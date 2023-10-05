@@ -2,10 +2,11 @@ package com.example.coffeebooksapp
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "books")
-data class Books(
+data class Book(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
     var title: String,
@@ -17,7 +18,7 @@ data class Books(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Books
+        other as Book
 
         if (!image.contentEquals(other.image)) return false
 
@@ -36,17 +37,19 @@ enum class BooksType {
 }
 
 @Entity(
-    tableName = "book_items",
+    tableName = "bookItems",
+    indices = [Index("bookId")],
     foreignKeys = [
         ForeignKey(
-            entity = Books::class,
+            entity = Book::class,
             parentColumns = ["id"],
             childColumns = ["bookId"],
-            onDelete = ForeignKey.CASCADE // 必要に応じてonDeleteを指定
+            onUpdate = ForeignKey.CASCADE, // 親テーブル更新時に子テーブルも同様に更新
+            onDelete = ForeignKey.CASCADE // 親テーブル更新時に子テーブルも同様に更新
         )
     ]
 )
-data class BooksItem(
+data class BookItem(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
     val bookId: Int, //Booksテーブルへの外部キー
@@ -58,7 +61,7 @@ data class BooksItem(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as BooksItem
+        other as BookItem
 
         if (!image.contentEquals(other.image)) return false
 

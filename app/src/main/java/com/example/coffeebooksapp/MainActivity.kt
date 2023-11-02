@@ -15,6 +15,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.coffeebooksapp.components.EditDialog
@@ -43,9 +45,16 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainContent(){
-    EditDialog()
+    val isShowDialog = remember {
+      mutableStateOf(false)
+    }
+
+    if (isShowDialog.value){
+        EditDialog(isShowDialog)
+    }
+
     Scaffold(floatingActionButton = {
-        FloatingActionButton(onClick = { /*TODO*/ }) {
+        FloatingActionButton(onClick = { isShowDialog.value = true }) {
             Icon(imageVector = Icons.Default.Add, contentDescription = "図鑑新規作成" )
         }
     }) {

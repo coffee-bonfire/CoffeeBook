@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "books")
 data class Book(
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    val id: Int = 0,
     var title: String,
     var description: String,
     var image: ByteArray,
@@ -51,7 +51,7 @@ enum class BooksType {
 )
 data class BookItem(
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    val id: Int = 0,
     val bookId: Int, //Booksテーブルへの外部キー
     var title: String,
     var description: String,

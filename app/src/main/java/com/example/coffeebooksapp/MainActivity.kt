@@ -13,12 +13,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.coffeebooksapp.components.EditDialog
 import com.example.coffeebooksapp.ui.theme.CoffeeBooksAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -54,7 +52,11 @@ fun MainContent(){
     }
 
     Scaffold(floatingActionButton = {
-        FloatingActionButton(onClick = { isShowDialog.value = true }) {
+        FloatingActionButton(
+            onClick = {
+                isShowDialog.value = true
+            })
+        {
             Icon(imageVector = Icons.Default.Add, contentDescription = "図鑑新規作成" )
         }
     }) {

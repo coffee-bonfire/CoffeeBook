@@ -8,14 +8,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
@@ -52,18 +55,24 @@ fun EditDialog(
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
+                    .padding(5.dp)
             ) {
-                LoadImage(bookViewModel.bookImage)
+                LoadImage { imageByteArray ->
+                    selectedImage = imageByteArray
+                }
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(text = "タイトル")
                 TextField(
                     value = bookViewModel.title,
                     onValueChange = { bookViewModel.title = it }
                 )
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "詳細")
                 TextField(
                     value = bookViewModel.description,
                     onValueChange = { bookViewModel.description = it }
                 )
+                Spacer(modifier = Modifier.height(16.dp))
             }
         },
         confirmButton = {
@@ -91,17 +100,27 @@ fun EditDialog(
                 ) {
                     Text(text = "OK")
                 }
+                Spacer(modifier = Modifier.weight(1f))
             }
         }
     )
 }
 
 @Composable
-fun LoadImage(image:ByteArray?) {
+fun LoadImage(onImageLoaded: (ByteArray) -> Unit) {
     var imageUri by remember { mutableStateOf<Uri?>(null) }
+    val context = LocalContext.current
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             imageUri = uri
+            // URIが変更されたときにコールバックを呼び出し
+            uri?.let {
+                val inputStream = context.contentResolver.openInputStream(it)
+                inputStream?.use { stream ->
+                    val byteArray = stream.readBytes()
+                    onImageLoaded(byteArray)
+                }
+            }
         }
 
     Column {
@@ -110,14 +129,24 @@ fun LoadImage(image:ByteArray?) {
                 launcher.launch("image/*")
             }
         ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = "図鑑画像")
+            Icon(
+                imageVector = if (imageUri == null) Icons.Default.Add else Icons.Default.Refresh,
+                contentDescription = "図鑑画像"
+            )
         }
-        Image(
-            painter = rememberAsyncImagePainter(imageUri),
-            contentDescription = "My Image",
-            modifier = Modifier.size(120.dp).clip(RoundedCornerShape(16.dp)),
-            contentScale = ContentScale.Crop,
-            alignment = Alignment.Center,
-        )
+        imageUri?.let {
+            Spacer(modifier = Modifier.width(10.dp))
+            Image(
+                painter = rememberAsyncImagePainter(imageUri),
+                contentDescription = "My Image",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.Center,
+            )
+        }
+
     }
 }

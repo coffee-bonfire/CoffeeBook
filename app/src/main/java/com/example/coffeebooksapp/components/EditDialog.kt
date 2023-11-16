@@ -35,10 +35,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.coffeebooksapp.BookViewModel
+import com.example.coffeebooksapp.R
 import java.io.File
 import java.io.FileOutputStream
 
@@ -53,7 +55,7 @@ fun EditDialog(
 
     AlertDialog(
         onDismissRequest = { isShowDialog.value = false },
-        title = { Text(text = "図鑑新規作成") },
+        title = { Text(text = stringResource(R.string.dialog_heading)) },
         text = {
             Column(
                 modifier = Modifier
@@ -64,13 +66,13 @@ fun EditDialog(
                     selectedImageUri = imageUri
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "タイトル")
+                Text(text = stringResource(R.string.dialog_title))
                 TextField(
                     value = bookViewModel.title,
                     onValueChange = { bookViewModel.title = it }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "詳細")
+                Text(text = stringResource(R.string.dialog_description))
                 TextField(
                     value = bookViewModel.description,
                     onValueChange = { bookViewModel.description = it }
@@ -90,7 +92,7 @@ fun EditDialog(
                         isShowDialog.value = false
                     }
                 ) {
-                    Text(text = "キャンセル")
+                    Text(text = stringResource(R.string.dialog_cancel))
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Button(
@@ -139,7 +141,7 @@ fun LoadImage(onImageLoaded: (Uri) -> Unit) {
             Spacer(modifier = Modifier.width(10.dp))
             Image(
                 painter = rememberAsyncImagePainter(imageUri),
-                contentDescription = "My Image",
+                contentDescription = stringResource(R.string.dialog_user_select_image),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)

@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">CoffeeBooksApp</string>
+    <string name="dialog_cancel">キャンセル</string>
+    <string name="dialog_title">タイトル</string>
+    <string name="dialog_description">詳細</string>
+    <string name="dialog_heading">図鑑新規作成</string>
+    <string name="dialog_user_select_image">ユーザ画像</string>
 </resources>

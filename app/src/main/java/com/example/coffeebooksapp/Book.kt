@@ -11,24 +11,9 @@ data class Book(
     val id: Int = 0,
     var title: String,
     var description: String,
-    var image: ByteArray,
+    var imageUri: String,
     val type: BooksType
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Book
-
-        if (!image.contentEquals(other.image)) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return image.contentHashCode()
-    }
-}
+)
 
 // ユーザが作成した図鑑かシステムが提供した図鑑かを示す
 enum class BooksType {
@@ -55,20 +40,5 @@ data class BookItem(
     val bookId: Int, //Booksテーブルへの外部キー
     var title: String,
     var description: String,
-    var image: ByteArray
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as BookItem
-
-        if (!image.contentEquals(other.image)) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return image.contentHashCode()
-    }
-}
+    var imageUri: String
+)

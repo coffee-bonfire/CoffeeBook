@@ -1,5 +1,6 @@
 package com.example.coffeebooksapp.components
 
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,19 +35,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.coffeebooksapp.BookViewModel
+import java.io.File
+import java.io.FileOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditDialog(
     isShowDialog: MutableState<Boolean>,
+    context: Context,
     bookViewModel: BookViewModel = hiltViewModel(),
 ) {
-    var selectedImage: ByteArray? by remember { mutableStateOf(null) }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     AlertDialog(
         onDismissRequest = { isShowDialog.value = false },
@@ -57,8 +60,8 @@ fun EditDialog(
                     .verticalScroll(rememberScrollState())
                     .padding(5.dp)
             ) {
-                LoadImage { imageByteArray ->
-                    selectedImage = imageByteArray
+                LoadImage { imageUri ->
+                    selectedImageUri = imageUri
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(text = "タイトル")
@@ -94,8 +97,11 @@ fun EditDialog(
                     modifier = Modifier.width(120.dp),
                     onClick = {
                         isShowDialog.value = false
-                        // 選択された画像をViewModelに設定
-                        bookViewModel.bookImage = selectedImage
+                        selectedImageUri?.let { uri ->
+                            // 選択された画像を内部ストレージに保存し、URIをViewModelに設定
+                            val savedImageUri = saveImageToInternalStorage(uri, context)
+                            bookViewModel.bookImageUri = savedImageUri
+                        }
                     }
                 ) {
                     Text(text = "OK")
@@ -107,19 +113,14 @@ fun EditDialog(
 }
 
 @Composable
-fun LoadImage(onImageLoaded: (ByteArray) -> Unit) {
+fun LoadImage(onImageLoaded: (Uri) -> Unit) {
     var imageUri by remember { mutableStateOf<Uri?>(null) }
-    val context = LocalContext.current
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             imageUri = uri
             // URIが変更されたときにコールバックを呼び出し
             uri?.let {
-                val inputStream = context.contentResolver.openInputStream(it)
-                inputStream?.use { stream ->
-                    val byteArray = stream.readBytes()
-                    onImageLoaded(byteArray)
-                }
+                onImageLoaded(it)
             }
         }
 
@@ -147,6 +148,20 @@ fun LoadImage(onImageLoaded: (ByteArray) -> Unit) {
                 alignment = Alignment.Center,
             )
         }
-
     }
+}
+
+fun saveImageToInternalStorage(uri: Uri, context: Context): String {
+    val imageFileName = "image_" + System.currentTimeMillis() + ".jpg"
+    val internalStorageDir = context.filesDir
+    val imageFile = File(internalStorageDir, imageFileName)
+
+    // 画像を内部ストレージに保存
+    context.contentResolver.openInputStream(uri)?.use { input ->
+        FileOutputStream(imageFile).use { output ->
+            input.copyTo(output)
+        }
+    }
+    // 保存された画像のURIを文字列として返す
+    return Uri.fromFile(imageFile).toString()
 }

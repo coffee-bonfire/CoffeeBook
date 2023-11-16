@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.example.coffeebooksapp.components.EditDialog
 import com.example.coffeebooksapp.ui.theme.CoffeeBooksAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -46,9 +47,10 @@ fun MainContent(){
     val isShowDialog = remember {
       mutableStateOf(false)
     }
+    val context = LocalContext.current
 
     if (isShowDialog.value){
-        EditDialog(isShowDialog)
+        EditDialog(isShowDialog,context)
     }
 
     Scaffold(floatingActionButton = {

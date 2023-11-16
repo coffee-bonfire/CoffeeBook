@@ -11,14 +11,14 @@ import javax.inject.Inject
 class BookViewModel @Inject constructor(private val bookDao: BookDao):ViewModel() {
     var title by mutableStateOf("")
     var description by mutableStateOf("")
-    var bookImage:ByteArray? by mutableStateOf(null)
+    var bookImageUri by mutableStateOf("")
     var type:BooksType by mutableStateOf(BooksType.USER_CREATED)
 
     fun createBook(){
         val newBook = Book(
             title = title,
             description = description,
-            image = bookImage?: byteArrayOf(),
+            imageUri = bookImageUri,
             type = type
         )
     }
@@ -29,13 +29,13 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
     var title by mutableStateOf("")
     var description by mutableStateOf("")
     val bookId by mutableStateOf("")
-    var bookItemImage:ByteArray? by mutableStateOf(null)
+    var bookItemImageUri by mutableStateOf("")
     fun createBookItem(){
         val newBook = BookItem(
             title = title,
             description = description,
             bookId = 1,
-            image = bookItemImage?: byteArrayOf(),
+            imageUri = bookItemImageUri,
         )
     }
 }

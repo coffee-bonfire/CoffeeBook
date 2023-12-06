@@ -3,6 +3,7 @@ package com.example.coffeebooksapp.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
@@ -18,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -71,19 +73,18 @@ sealed class NavigationItem(var route: String, val icon: ImageVector?, var title
 
 @Composable
 fun Navigations(navController: NavHostController) {
-    NavHost(navController, startDestination = NavigationItem.Home.route) {
+    NavHost(
+        navController,
+        startDestination = NavigationItem.Home.route,
+        modifier = Modifier.padding(30.dp)
+    ) {
         composable(NavigationItem.Home.route) {
             HomeScreen()
         }
         composable(NavigationItem.Setting.route) {
-            SettingScreen()
+            SettingComponent()
         }
     }
-}
-
-@Composable
-fun SettingScreen(){
-    CenterText(text = "Setting")
 }
 
 @Composable

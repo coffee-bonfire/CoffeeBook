@@ -97,7 +97,7 @@ fun MainContent(
             modifier = Modifier.padding(
                 PaddingValues(
                     0.dp,
-                    0.dp,
+                    50.dp,
                     0.dp,
                     innerPadding.calculateBottomPadding()
                 )

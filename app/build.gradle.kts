@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.android.gms.oss-licenses-plugin")
 }
 
 android {
@@ -91,5 +92,8 @@ dependencies {
 
     // navigation
     implementation("androidx.navigation:navigation-compose:$nav_version")
+
+    // open source
+    implementation("com.google.android.gms:play-services-oss-licenses:17.0.1")
 
 }

@@ -9,6 +9,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("release") {
+//            storeFile = file("")
+//            keyAlias = ""
+//            storePassword = ""
+//            keyPassword = ""
+        }
+    }
     namespace = "com.example.coffeebooksapp"
     compileSdk = 33
 
@@ -32,6 +40,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {

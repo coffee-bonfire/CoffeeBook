@@ -1,10 +1,13 @@
 package com.example.coffeebooksapp
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -15,12 +18,15 @@ class BookViewModel @Inject constructor(private val bookDao: BookDao):ViewModel(
     var type:BooksType by mutableStateOf(BooksType.USER_CREATED)
 
     fun createBook(){
-        val newBook = Book(
-            title = title,
-            description = description,
-            imageUri = bookImageUri,
-            type = type
-        )
+        viewModelScope.launch {
+            val newBook = Book(
+                title = title,
+                description = description,
+                imageUri = bookImageUri,
+                type = type
+            )
+            bookDao.insertBook(newBook)
+        }
     }
 }
 

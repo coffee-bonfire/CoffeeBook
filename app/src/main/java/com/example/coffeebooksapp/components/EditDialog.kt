@@ -103,6 +103,7 @@ fun EditDialog(
                             // 選択された画像を内部ストレージに保存し、URIをViewModelに設定
                             val savedImageUri = saveImageToInternalStorage(uri, context)
                             bookViewModel.bookImageUri = savedImageUri
+                            bookViewModel.createBook()
                         }
                     }
                 ) {

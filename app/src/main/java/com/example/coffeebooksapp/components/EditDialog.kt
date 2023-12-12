@@ -47,14 +47,13 @@ import java.io.FileOutputStream
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditDialog(
-    isShowDialog: MutableState<Boolean>,
     context: Context,
     bookViewModel: BookViewModel = hiltViewModel(),
 ) {
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     AlertDialog(
-        onDismissRequest = { isShowDialog.value = false },
+        onDismissRequest = { bookViewModel.isShowDialog = false },
         title = { Text(text = stringResource(R.string.dialog_heading)) },
         text = {
             Column(
@@ -89,7 +88,7 @@ fun EditDialog(
                 Button(
                     modifier = Modifier.width(120.dp),
                     onClick = {
-                        isShowDialog.value = false
+                        bookViewModel.isShowDialog = false
                     }
                 ) {
                     Text(text = stringResource(R.string.dialog_cancel))
@@ -98,7 +97,7 @@ fun EditDialog(
                 Button(
                     modifier = Modifier.width(120.dp),
                     onClick = {
-                        isShowDialog.value = false
+                        bookViewModel.isShowDialog = false
                         selectedImageUri?.let { uri ->
                             // 選択された画像を内部ストレージに保存し、URIをViewModelに設定
                             val savedImageUri = saveImageToInternalStorage(uri, context)

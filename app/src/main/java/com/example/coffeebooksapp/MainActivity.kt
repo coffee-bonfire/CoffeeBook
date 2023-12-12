@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.coffeebooksapp.components.BottomNavigationBar
@@ -57,15 +58,13 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainContent(
+    bookViewModel: BookViewModel = hiltViewModel(),
     navController: NavHostController
 ){
-    val isShowDialog = remember {
-      mutableStateOf(false)
-    }
     val context = LocalContext.current
 
-    if (isShowDialog.value){
-        EditDialog(isShowDialog,context)
+    if (bookViewModel.isShowDialog){
+        EditDialog(context)
     }
 
     Scaffold(
@@ -87,7 +86,7 @@ fun MainContent(
         floatingActionButton = {
         FloatingActionButton(
             onClick = {
-                isShowDialog.value = true
+                bookViewModel.isShowDialog = true
             })
         {
             Icon(imageVector = Icons.Default.Add, contentDescription = "図鑑新規作成" )

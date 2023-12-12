@@ -17,6 +17,8 @@ class BookViewModel @Inject constructor(private val bookDao: BookDao):ViewModel(
     var bookImageUri by mutableStateOf("")
     var type:BooksType by mutableStateOf(BooksType.USER_CREATED)
 
+    var isShowDialog by mutableStateOf(false)
+
     fun createBook(){
         viewModelScope.launch {
             val newBook = Book(

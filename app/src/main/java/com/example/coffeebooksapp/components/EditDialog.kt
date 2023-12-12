@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -26,7 +27,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -127,16 +127,32 @@ fun LoadImage(onImageLoaded: (Uri) -> Unit) {
         }
 
     Column {
-        Button(
-            onClick = {
-                launcher.launch("image/*")
+        Row {
+            Button(
+                onClick = {
+                    launcher.launch("image/*")
+                }
+            ) {
+                Icon(
+                    imageVector = if (imageUri == null) Icons.Default.Add else Icons.Default.Refresh,
+                    contentDescription = "図鑑画像追加・更新"
+                )
             }
-        ) {
-            Icon(
-                imageVector = if (imageUri == null) Icons.Default.Add else Icons.Default.Refresh,
-                contentDescription = "図鑑画像"
-            )
+            Spacer(modifier = Modifier.width(10.dp))
+            if (imageUri != null){
+                Button(
+                    onClick = {
+                        imageUri = null
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "図鑑画像削除"
+                    )
+                }
+            }
         }
+
         imageUri?.let {
             Spacer(modifier = Modifier.width(10.dp))
             Image(

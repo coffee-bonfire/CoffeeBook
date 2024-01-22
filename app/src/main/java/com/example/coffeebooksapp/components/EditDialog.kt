@@ -41,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.coffeebooksapp.BookViewModel
 import com.example.coffeebooksapp.R
+import com.example.coffeebooksapp.components.Util.Companion.convertStringToUri
 import java.io.File
 import java.io.FileOutputStream
 
@@ -54,16 +55,19 @@ fun EditDialog(
 
     AlertDialog(
         onDismissRequest = { bookViewModel.isShowDialog = false },
-        title = { Text(text = stringResource(R.string.dialog_heading)) },
+        title = { Text(text = if (bookViewModel.isEditing) "図鑑更新" else stringResource(R.string.dialog_heading)) },
         text = {
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
                     .padding(5.dp)
             ) {
-                LoadImage { imageUri ->
-                    selectedImageUri = imageUri
-                }
+                LoadImage(
+                    { imageUri ->
+                        selectedImageUri = imageUri
+                    },
+                    bookViewModel.bookImageUri
+                )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(text = stringResource(R.string.dialog_title))
                 TextField(
@@ -98,10 +102,27 @@ fun EditDialog(
                     modifier = Modifier.width(120.dp),
                     onClick = {
                         bookViewModel.isShowDialog = false
-                        selectedImageUri?.let { uri ->
-                            // 選択された画像を内部ストレージに保存し、URIをViewModelに設定
-                            val savedImageUri = saveImageToInternalStorage(uri, context)
-                            bookViewModel.bookImageUri = savedImageUri
+                        if (bookViewModel.isEditing) {
+                            // 画像を変更した場合には変更前の画像を削除する
+                            selectedImageUri?.let { newUri ->
+                                val oldBookUri: Uri? =
+                                    convertStringToUri(bookViewModel.bookImageUri)
+                                val file = File(oldBookUri?.path ?: "")
+                                if (file.exists()) {
+                                    file.delete()
+                                }
+                                val savedImageUri = saveImageToInternalStorage(newUri, context)
+                                bookViewModel.bookImageUri = savedImageUri
+                            }
+                            bookViewModel.updateBook()
+
+                        } else {
+                            // 画像を選択している場合は画像を保存
+                            selectedImageUri?.let { uri ->
+                                // 選択された画像を内部ストレージに保存し、URIをViewModelに設定
+                                val savedImageUri = saveImageToInternalStorage(uri, context)
+                                bookViewModel.bookImageUri = savedImageUri
+                            }
                             bookViewModel.createBook()
                         }
                     }
@@ -115,16 +136,17 @@ fun EditDialog(
 }
 
 @Composable
-fun LoadImage(onImageLoaded: (Uri) -> Unit) {
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
+fun LoadImage(onImageLoaded: (Uri) -> Unit, bookImageUriString: String) {
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            imageUri = uri
+            selectedImageUri = uri
             // URIが変更されたときにコールバックを呼び出し
             uri?.let {
                 onImageLoaded(it)
             }
         }
+    val bookImageUri = convertStringToUri(bookImageUriString)
 
     Column {
         Row {
@@ -134,15 +156,15 @@ fun LoadImage(onImageLoaded: (Uri) -> Unit) {
                 }
             ) {
                 Icon(
-                    imageVector = if (imageUri == null) Icons.Default.Add else Icons.Default.Refresh,
+                    imageVector = if (selectedImageUri == null) Icons.Default.Add else Icons.Default.Refresh,
                     contentDescription = "図鑑画像追加・更新"
                 )
             }
             Spacer(modifier = Modifier.width(10.dp))
-            if (imageUri != null){
+            if (selectedImageUri != null) {
                 Button(
                     onClick = {
-                        imageUri = null
+                        selectedImageUri = null
                     }
                 ) {
                     Icon(
@@ -153,10 +175,10 @@ fun LoadImage(onImageLoaded: (Uri) -> Unit) {
             }
         }
 
-        imageUri?.let {
+        selectedImageUri?.let {
             Spacer(modifier = Modifier.width(10.dp))
             Image(
-                painter = rememberAsyncImagePainter(imageUri),
+                painter = rememberAsyncImagePainter(selectedImageUri),
                 contentDescription = stringResource(R.string.dialog_user_select_image),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -166,11 +188,26 @@ fun LoadImage(onImageLoaded: (Uri) -> Unit) {
                 alignment = Alignment.Center,
             )
         }
+        if (selectedImageUri == null) {
+            bookImageUri.let {
+                Spacer(modifier = Modifier.width(10.dp))
+                Image(
+                    painter = rememberAsyncImagePainter(bookImageUri),
+                    contentDescription = stringResource(R.string.dialog_user_select_image),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(16.dp)),
+                    contentScale = ContentScale.Crop,
+                    alignment = Alignment.Center,
+                )
+            }
+        }
     }
 }
 
 fun saveImageToInternalStorage(uri: Uri, context: Context): String {
-    val imageFileName = "image_" + System.currentTimeMillis() + ".jpg"
+    val imageFileName = "image_${System.currentTimeMillis()}.jpg"
     val internalStorageDir = context.filesDir
     val imageFile = File(internalStorageDir, imageFileName)
 

@@ -1,12 +1,12 @@
 package com.example.coffeebooksapp
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,6 +19,21 @@ class BookViewModel @Inject constructor(private val bookDao: BookDao):ViewModel(
 
     var isShowDialog by mutableStateOf(false)
 
+    // distinctUntilChanged:値が同じ場合は無視する
+    val books = bookDao.loadAllBooks().distinctUntilChanged()
+
+    // 状態判別
+    private var editingBook: Book? = null
+    val isEditing: Boolean
+        get() = editingBook != null
+
+    fun setEditingBook(book:Book){
+        editingBook = book
+        title = book.title
+        description = book.description
+        bookImageUri = book.imageUri
+    }
+
     fun createBook(){
         viewModelScope.launch {
             val newBook = Book(
@@ -28,6 +43,23 @@ class BookViewModel @Inject constructor(private val bookDao: BookDao):ViewModel(
                 type = type
             )
             bookDao.insertBook(newBook)
+        }
+    }
+
+    fun deleteBook(book: Book) {
+        viewModelScope.launch {
+            bookDao.deleteBook(book)
+        }
+    }
+
+    fun updateBook(){
+        editingBook?.let{book ->
+            viewModelScope.launch{
+                book.title = title
+                book.description = description
+                book.imageUri = if (bookImageUri == "") "" else bookImageUri
+                bookDao.updateBook(book)
+            }
         }
     }
 }

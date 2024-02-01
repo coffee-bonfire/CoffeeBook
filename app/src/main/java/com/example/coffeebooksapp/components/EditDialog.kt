@@ -27,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +52,13 @@ fun EditDialog(
     context: Context,
     bookViewModel: BookViewModel = hiltViewModel(),
 ) {
+    // EditDialogが非表示になるタイミングで実行される
+    // 保持しているviewModelの値をクリアする
+    DisposableEffect(Unit){
+        onDispose {
+            bookViewModel.resetProperties()
+        }
+    }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     AlertDialog(
@@ -146,7 +154,7 @@ fun LoadImage(onImageLoaded: (Uri) -> Unit, bookImageUriString: String) {
                 onImageLoaded(it)
             }
         }
-    val bookImageUri = convertStringToUri(bookImageUriString)
+    val bookImageUri = if (bookImageUriString == "") "" else convertStringToUri(bookImageUriString)
 
     Column {
         Row {
@@ -156,7 +164,7 @@ fun LoadImage(onImageLoaded: (Uri) -> Unit, bookImageUriString: String) {
                 }
             ) {
                 Icon(
-                    imageVector = if (selectedImageUri == null) Icons.Default.Add else Icons.Default.Refresh,
+                    imageVector = if (selectedImageUri == null && bookImageUri == "") Icons.Default.Add else Icons.Default.Refresh,
                     contentDescription = "図鑑画像追加・更新"
                 )
             }
@@ -175,21 +183,8 @@ fun LoadImage(onImageLoaded: (Uri) -> Unit, bookImageUriString: String) {
             }
         }
 
-        selectedImageUri?.let {
-            Spacer(modifier = Modifier.width(10.dp))
-            Image(
-                painter = rememberAsyncImagePainter(selectedImageUri),
-                contentDescription = stringResource(R.string.dialog_user_select_image),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(16.dp)),
-                contentScale = ContentScale.Crop,
-                alignment = Alignment.Center,
-            )
-        }
         if (selectedImageUri == null) {
-            bookImageUri.let {
+            if (bookImageUri != ""){
                 Spacer(modifier = Modifier.width(10.dp))
                 Image(
                     painter = rememberAsyncImagePainter(bookImageUri),
@@ -202,6 +197,18 @@ fun LoadImage(onImageLoaded: (Uri) -> Unit, bookImageUriString: String) {
                     alignment = Alignment.Center,
                 )
             }
+        } else {
+            Spacer(modifier = Modifier.width(10.dp))
+            Image(
+                painter = rememberAsyncImagePainter(selectedImageUri),
+                contentDescription = stringResource(R.string.dialog_user_select_image),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.Center,
+            )
         }
     }
 }

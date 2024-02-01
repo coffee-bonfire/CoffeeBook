@@ -4,10 +4,16 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.BottomAppBar
@@ -19,11 +25,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color.Companion.Yellow
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -60,22 +68,29 @@ class MainActivity : ComponentActivity() {
 fun MainContent(
     bookViewModel: BookViewModel = hiltViewModel(),
     navController: NavHostController
-){
+) {
     val context = LocalContext.current
+    // TopAppBar のスクロール動作を指定するためのデフォルトの設定
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-    if (bookViewModel.isShowDialog){
+    if (bookViewModel.isShowDialog) {
         EditDialog(context)
     }
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
                 title = {
                     Text(
+                        text = stringResource(id = R.string.app_name),
+                        style = MaterialTheme.typography.displaySmall,
                         textAlign = TextAlign.Center,
-                        text = "コーヒー図鑑"
+                        modifier = Modifier.fillMaxWidth(),
                     )
-                }
+                },
+                modifier = Modifier.statusBarsPadding(),
+                scrollBehavior = scrollBehavior
             )
         },
         bottomBar = {
@@ -84,14 +99,17 @@ fun MainContent(
             }
         },
         floatingActionButton = {
-        FloatingActionButton(
-            onClick = {
-                bookViewModel.isShowDialog = true
-            })
-        {
-            Icon(imageVector = Icons.Default.Add, contentDescription = "図鑑新規作成" )
+            FloatingActionButton(
+                onClick = {
+                    bookViewModel.isShowDialog = true
+                })
+            {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "図鑑新規作成")
+            }
         }
-    }) { innerPadding ->
+    ) {
+        // innerPadding は、Scaffold コンポーネントの中で他のコンポーネントを配置する際に、その内側の余白を表す
+            innerPadding ->
         Box(
             modifier = Modifier.padding(
                 PaddingValues(

@@ -1,4 +1,4 @@
-package com.example.coffeebooksapp.ui.theme
+package com.dandanbiyori.coffeebooksapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

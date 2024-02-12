@@ -17,11 +17,11 @@ android {
 //            keyPassword = ""
         }
     }
-    namespace = "com.example.coffeebooksapp"
+    namespace = "com.dandanbiyori.coffeebooksapp"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.example.coffeebooksapp"
+        applicationId = "com.dandanbiyori.coffeebooksapp"
         minSdk = 24
         targetSdk = 33
         versionCode = 1
@@ -64,6 +64,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     val nav_version = "2.5.3"
 
     implementation("androidx.core:core-ktx:1.9.0")
@@ -104,5 +105,8 @@ dependencies {
 
     // open source
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.1")
+
+    // flat layout
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 
 }

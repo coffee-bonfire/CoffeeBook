@@ -1,9 +1,9 @@
-package com.example.coffeebooksapp.components
+package com.dandanbiyori.coffeebooksapp.components
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
-import com.example.coffeebooksapp.Book
-import com.example.coffeebooksapp.BookViewModel
+import com.dandanbiyori.coffeebooksapp.Book
+import com.dandanbiyori.coffeebooksapp.BookViewModel
 
 @Composable
 fun HomeScreen(books:List<Book>, bookViewModel: BookViewModel, navController: NavController) {

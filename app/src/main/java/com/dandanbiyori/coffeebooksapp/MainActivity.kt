@@ -1,19 +1,15 @@
-package com.example.coffeebooksapp
+package com.dandanbiyori.coffeebooksapp
 
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.BottomAppBar
@@ -28,7 +24,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color.Companion.Yellow
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -37,10 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.coffeebooksapp.components.BottomNavigationBar
-import com.example.coffeebooksapp.components.EditDialog
-import com.example.coffeebooksapp.components.Navigations
-import com.example.coffeebooksapp.ui.theme.CoffeeBooksAppTheme
+import com.dandanbiyori.coffeebooksapp.components.BottomNavigationBar
+import com.dandanbiyori.coffeebooksapp.components.EditDialog
+import com.dandanbiyori.coffeebooksapp.components.Navigations
+import com.dandanbiyori.coffeebooksapp.ui.theme.CoffeeBooksAppTheme
+import com.dandanbiyori.coffeebooksapp.R
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -90,7 +86,6 @@ fun MainContent(
                     )
                 },
                 modifier = Modifier.statusBarsPadding(),
-                scrollBehavior = scrollBehavior
             )
         },
         bottomBar = {

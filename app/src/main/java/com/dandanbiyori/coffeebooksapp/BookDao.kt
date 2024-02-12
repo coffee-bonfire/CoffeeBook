@@ -1,4 +1,4 @@
-package com.example.coffeebooksapp
+package com.dandanbiyori.coffeebooksapp
 
 import androidx.room.Dao
 import androidx.room.Delete

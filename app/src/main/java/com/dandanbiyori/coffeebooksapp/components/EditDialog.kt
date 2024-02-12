@@ -1,4 +1,4 @@
-package com.example.coffeebooksapp.components
+package com.dandanbiyori.coffeebooksapp.components
 
 import android.content.Context
 import android.net.Uri
@@ -40,9 +40,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
-import com.example.coffeebooksapp.BookViewModel
-import com.example.coffeebooksapp.R
-import com.example.coffeebooksapp.components.Util.Companion.convertStringToUri
+import com.dandanbiyori.coffeebooksapp.BookViewModel
+import com.dandanbiyori.coffeebooksapp.components.Util.Companion.convertStringToUri
+import com.dandanbiyori.coffeebooksapp.R
 import java.io.File
 import java.io.FileOutputStream
 

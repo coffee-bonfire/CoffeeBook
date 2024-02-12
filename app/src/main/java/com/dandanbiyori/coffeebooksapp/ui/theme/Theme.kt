@@ -1,4 +1,4 @@
-package com.example.coffeebooksapp.ui.theme
+package com.dandanbiyori.coffeebooksapp.ui.theme
 
 import android.app.Activity
 import android.os.Build

@@ -1,4 +1,4 @@
-package com.example.coffeebooksapp
+package com.dandanbiyori.coffeebooksapp
 
 import androidx.room.Entity
 import androidx.room.ForeignKey

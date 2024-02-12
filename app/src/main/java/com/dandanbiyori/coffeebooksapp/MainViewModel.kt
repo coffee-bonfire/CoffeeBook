@@ -1,4 +1,4 @@
-package com.example.coffeebooksapp
+package com.dandanbiyori.coffeebooksapp
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +61,13 @@ class BookViewModel @Inject constructor(private val bookDao: BookDao):ViewModel(
                 bookDao.updateBook(book)
             }
         }
+    }
+
+    fun resetProperties(){
+        editingBook = null
+        title = ""
+        description = ""
+        bookImageUri = ""
     }
 }
 

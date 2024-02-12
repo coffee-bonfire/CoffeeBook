@@ -1,4 +1,4 @@
-package com.example.coffeebooksapp.components
+package com.dandanbiyori.coffeebooksapp.components
 
 import android.content.Context
 import android.content.Intent

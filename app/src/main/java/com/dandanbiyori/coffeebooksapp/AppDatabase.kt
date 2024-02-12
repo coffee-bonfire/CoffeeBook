@@ -1,4 +1,4 @@
-package com.example.coffeebooksapp
+package com.dandanbiyori.coffeebooksapp
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

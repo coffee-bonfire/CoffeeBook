@@ -5,4 +5,8 @@
     <string name="dialog_description">詳細</string>
     <string name="dialog_heading">図鑑新規作成</string>
     <string name="dialog_user_select_image">ユーザ画像</string>
+    <string name="tab_coffee_books">Coffee Book</string>
+    <string name="tab_my_books">My Book</string>
+    <string name="app_setting">設定</string>
+
 </resources>

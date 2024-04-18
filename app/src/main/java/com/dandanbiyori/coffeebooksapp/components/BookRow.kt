@@ -1,7 +1,6 @@
 package com.dandanbiyori.coffeebooksapp.components
 
 import android.graphics.Bitmap
-import android.graphics.Matrix
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import androidx.compose.foundation.Image
@@ -17,6 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -41,8 +43,6 @@ import com.dandanbiyori.coffeebooksapp.components.Util.Companion.convertUriToBit
 import com.dandanbiyori.coffeebooksapp.Book
 import com.dandanbiyori.coffeebooksapp.R
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookRow(
     book: (Book),
@@ -51,13 +51,17 @@ fun BookRow(
     onClickDelete: (Book) -> Unit,
     navController: NavController
 ){
+    // ストレージに保存してあるパスからuriを作成
     val uri:Uri? = convertStringToUri(book.imageUri)
     val context = LocalContext.current
     var imageBitmap: Bitmap? = null
+
+    // uriをBitmapに変換
     if (uri != null){
         imageBitmap = convertUriToBitmap(uri,context)
     }
 
+    // 変換できなかった場合や画像が存在しない場合はデフォルトの画像を使用する
     if (imageBitmap == null){
         val drawable: Drawable? = ContextCompat.getDrawable(context, R.drawable.default_icon)
         imageBitmap = drawable?.toBitmap()
@@ -72,6 +76,7 @@ fun BookRow(
             defaultElevation = 10.dp
         ),
     ) {
+        // TODO 削除機能を追加する
         Row(
             modifier = Modifier
                 .clickable {
@@ -101,25 +106,20 @@ fun BookRow(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            IconButton(
-                onClick = {
-                    onClickUpdate(book)
-//                    val file = File(uri.path ?: "")
-//                    if (file.exists()) {
-//                        file.delete()
-//                    }
-                },
-                modifier = Modifier.size(24.dp),
-            ) {
-                Icon(imageVector = Icons.Default.Edit, contentDescription = "Book edit")
-            }
+                IconButton(
+                    onClick = {
+                        onClickUpdate(book)
+                    },
+                    modifier = Modifier.size(24.dp),
+                ) {
+                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Book edit")
+                }
         }
     }
 }
 
-fun bitmapResize(bitmap:Bitmap):Bitmap{
-    val matrix = Matrix()
-    matrix.postScale(0.5f, 0.5f) // 0.5倍調整
-    val scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-    return scaledBitmap
+sealed class NavigationItem(var route: String, val icon: ImageVector?, var title: String) {
+    object Home : NavigationItem("Home", Icons.Default.Home, "Home")
+    object Setting : NavigationItem("History", Icons.Default.Settings, "Setting")
+    object Book : NavigationItem("Book", Icons.Default.Home, "Book")
 }

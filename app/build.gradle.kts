@@ -18,12 +18,12 @@ android {
         }
     }
     namespace = "com.dandanbiyori.coffeebooksapp"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.dandanbiyori.coffeebooksapp"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -108,5 +108,9 @@ dependencies {
 
     // flat layout
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+
+    // to use swipable
+    implementation("androidx.compose.foundation:foundation:1.6.0")
+
 
 }

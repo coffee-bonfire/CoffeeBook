@@ -18,6 +18,7 @@ class BookViewModel @Inject constructor(private val bookDao: BookDao):ViewModel(
     var type:BooksType by mutableStateOf(BooksType.USER_CREATED)
 
     var isShowDialog by mutableStateOf(false)
+    var isUserBook by mutableStateOf(false)
 
     // distinctUntilChanged:値が同じ場合は無視する
     val books = bookDao.loadAllBooks().distinctUntilChanged()

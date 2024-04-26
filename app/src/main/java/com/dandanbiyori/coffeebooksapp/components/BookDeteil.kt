@@ -1,27 +1,48 @@
 package com.dandanbiyori.coffeebooksapp.components
 
-import androidx.compose.foundation.layout.Arrangement
+import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.dandanbiyori.coffeebooksapp.BookItemViewModel
+import com.dandanbiyori.coffeebooksapp.R
 
+// Book詳細画面（BookItem一覧）
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookDeteil(
     bookId: Int,
     onClick: () -> Unit,
+    bookItemViewModel : BookItemViewModel = hiltViewModel(),
+    onClickUpdate: () -> Unit
 ){
     Scaffold(
         topBar = {
@@ -40,26 +61,53 @@ fun BookDeteil(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    // TODO 図鑑を追加する
+                    onClickUpdate()
                 })
             {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "図鑑新規作成")
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "図鑑アイテム新規作成"
+                )
             }
         }
 
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+        BookDeteilScreen(padding)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BookDeteilScreen (padding:PaddingValues){
+    Card(
+        onClick = {
+//            TODO
+        },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+        modifier = Modifier
+            .padding(horizontal = dimensionResource(id = R.dimen.card_side_margin))
+            .padding(bottom = dimensionResource(id = R.dimen.card_bottom_margin))
+    ) {
+        Column(Modifier.fillMaxWidth()) {
+            Image(
+                painter = painterResource(R.drawable.default_icon),
+                contentDescription = "bookdetail ",
+                Modifier
+                    .fillMaxWidth()
+                    .height(dimensionResource(id = R.dimen.book_item_image_height)),
+                contentScale = ContentScale.Crop
+            )
             Text(
-                text = "bookId: $bookId"
+                text = "テスト",
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = dimensionResource(id = R.dimen.margin_normal))
+                    .wrapContentWidth(Alignment.CenterHorizontally)
             )
         }
     }
+
 }

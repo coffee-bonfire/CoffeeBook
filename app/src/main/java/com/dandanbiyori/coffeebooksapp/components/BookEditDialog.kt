@@ -46,9 +46,10 @@ import com.dandanbiyori.coffeebooksapp.R
 import java.io.File
 import java.io.FileOutputStream
 
+// 図鑑作成ダイアログ画面
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditDialog(
+fun BookEditDialog(
     context: Context,
     bookViewModel: BookViewModel = hiltViewModel(),
 ) {

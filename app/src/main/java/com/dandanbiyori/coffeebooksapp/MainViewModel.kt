@@ -78,12 +78,53 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
     var description by mutableStateOf("")
     val bookId by mutableStateOf("")
     var bookItemImageUri by mutableStateOf("")
+
+    var isShowDialog by mutableStateOf(false)
+    private var editingBookItem: BookItem? = null
+
+    val isEditing: Boolean
+        get() = editingBookItem != null
+
+
     fun createBookItem(){
-        val newBook = BookItem(
-            title = title,
-            description = description,
-            bookId = 1,
-            imageUri = bookItemImageUri,
-        )
+        viewModelScope.launch {
+            val newBookItem = BookItem(
+                title = title,
+                bookId = 1,
+                description = description,
+                imageUri = bookItemImageUri,
+            )
+            bookItemDao.insertBookItem(newBookItem)
+        }
+    }
+    fun setEditingBookItem(bookItem:BookItem){
+        editingBookItem = bookItem
+        title = bookItem.title
+        description = bookItem.description
+        bookItemImageUri = bookItem.imageUri
+    }
+
+    fun deleteBookItem(bookItem: BookItem) {
+        viewModelScope.launch {
+            bookItemDao.deleteBookItem(bookItem)
+        }
+    }
+
+    fun updateBook(){
+        editingBookItem?.let{bookItem ->
+            viewModelScope.launch{
+                bookItem.title = title
+                bookItem.description = description
+                bookItem.imageUri = if (bookItemImageUri == "") "" else bookItemImageUri
+                bookItemDao.updateBookItem(bookItem)
+            }
+        }
+    }
+
+    fun resetProperties(){
+        editingBookItem = null
+        title = ""
+        description = ""
+        bookItemImageUri = ""
     }
 }

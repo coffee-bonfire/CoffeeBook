@@ -6,12 +6,11 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
-import androidx.compose.ui.platform.LocalContext
 
 class Util {
     companion object {
         fun convertStringToUri(uriString:String): Uri? {
-            var uri:Uri? = null
+            val uri:Uri?
             try {
                 uri = Uri.parse(uriString)
             } catch (e:Exception){
@@ -41,11 +40,10 @@ class Util {
             return imageBitmap
         }
 
-        private fun bitmapResize(bitmap:Bitmap):Bitmap{
+        private fun bitmapResize(bitmap: Bitmap): Bitmap {
             val matrix = Matrix()
             matrix.postScale(0.5f, 0.5f) // 0.5倍調整
-            val scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-            return scaledBitmap
+            return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
         }
     }
 

@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.dandanbiyori.coffeebooksapp.NavigationItem
 
 @Composable
@@ -23,10 +24,13 @@ fun BottomNavigationBar(
         NavigationItem.Setting,
     )
     var selectedItem by remember { mutableStateOf(0) }
-    var currentRoute by remember { mutableStateOf(NavigationItem.Home.route) }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    // 現在のルートが変更されるたびに、selectedItemとcurrentRouteが適切に更新する
+    val currentRoute = navBackStackEntry?.destination?.route ?: NavigationItem.Home.route
 
     items.forEachIndexed { index, navigationItem ->
-        if (navigationItem.route == currentRoute) {
+        val isSelected = navigationItem.route == currentRoute
+        if (isSelected) {
             selectedItem = index
         }
     }
@@ -43,7 +47,6 @@ fun BottomNavigationBar(
                 selected = selectedItem == index,
                 onClick = {
                     selectedItem = index
-                    currentRoute = item.route
                     navController.navigate(item.route) {
                         navController.graph.startDestinationRoute?.let { route ->
                             popUpTo(route) {

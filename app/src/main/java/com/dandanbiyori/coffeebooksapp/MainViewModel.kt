@@ -82,15 +82,18 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
     var isShowDialog by mutableStateOf(false)
     private var editingBookItem: BookItem? = null
 
+    // distinctUntilChanged:値が同じ場合は無視する
+    val bookItems = bookItemDao.loadAllBookItems().distinctUntilChanged()
+
     val isEditing: Boolean
         get() = editingBookItem != null
 
 
-    fun createBookItem(){
+    fun createBookItem(bookId:Int){
         viewModelScope.launch {
             val newBookItem = BookItem(
                 title = title,
-                bookId = 1,
+                bookId = bookId,
                 description = description,
                 imageUri = bookItemImageUri,
             )

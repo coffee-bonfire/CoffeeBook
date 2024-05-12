@@ -43,6 +43,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.dandanbiyori.coffeebooksapp.BookViewModel
 import com.dandanbiyori.coffeebooksapp.components.Util.Companion.convertStringToUri
 import com.dandanbiyori.coffeebooksapp.R
+import com.dandanbiyori.coffeebooksapp.components.Util.Companion.saveImageToInternalStorage
 import java.io.File
 import java.io.FileOutputStream
 
@@ -214,17 +215,3 @@ fun LoadImage(onImageLoaded: (Uri) -> Unit, bookImageUriString: String) {
     }
 }
 
-fun saveImageToInternalStorage(uri: Uri, context: Context): String {
-    val imageFileName = "image_${System.currentTimeMillis()}.jpg"
-    val internalStorageDir = context.filesDir
-    val imageFile = File(internalStorageDir, imageFileName)
-
-    // 画像を内部ストレージに保存
-    context.contentResolver.openInputStream(uri)?.use { input ->
-        FileOutputStream(imageFile).use { output ->
-            input.copyTo(output)
-        }
-    }
-    // 保存された画像のURIを文字列として返す
-    return Uri.fromFile(imageFile).toString()
-}

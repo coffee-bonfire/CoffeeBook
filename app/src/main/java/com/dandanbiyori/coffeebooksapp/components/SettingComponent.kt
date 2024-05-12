@@ -93,19 +93,43 @@ fun SettingComponent(
                             }
                     ) {
                         Text(
-
                             text = "バージョン情報",
                             fontSize = 20.sp,
                             textAlign = TextAlign.Left,
                         )
                         Spacer(modifier = Modifier.width(10.dp))
-                        Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = "version_info" )
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowRight,
+                            contentDescription = "version_info"
+                        )
+                        Spacer(modifier = Modifier.width(30.dp))
+                    }
+                }
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 20.dp)
+                            .clickable {
+                                // todo クリック時にヘルプ画面を表示する
+                            }
+                    ) {
+                        Text(
+                            text = "ヘルプ",
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Left,
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowRight,
+                            contentDescription = "version_info"
+                        )
                         Spacer(modifier = Modifier.width(30.dp))
 
                     }
                 }
             }
-            }
+        }
 
     }
 

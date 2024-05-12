@@ -45,7 +45,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    books:List<Book>,
+    books: List<Book>,
     bookViewModel: BookViewModel,
     navController: NavController,
     pages: Array<CoffeeBooksPage> = CoffeeBooksPage.values(),
@@ -58,46 +58,45 @@ fun HomeScreen(
     )
     val coroutineScope = rememberCoroutineScope()
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = stringResource(id = R.string.app_name),
-                            style = MaterialTheme.typography.headlineLarge,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth(),
-                            color = Color.Black
-                        )
-                    },
-                    modifier = Modifier.statusBarsPadding(),
-                    colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xFFD3A780))
-                )
-            },
-            bottomBar = {
-                BottomAppBar(
-                    modifier = Modifier.fillMaxWidth(),
-                    containerColor = Color(0xFFD3A780),
-                    contentColor = Color(0xFFD3A780)
-                ) {
-                    BottomNavigationBar(
-                        navController = navController,
-                        color = 0xFFD3A780
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.app_name),
+                        style = MaterialTheme.typography.headlineLarge,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color.Black
                     )
-                }
-            },
-            floatingActionButton = {
-                if(bookViewModel.isUserBook){
-                    FloatingActionButton(
-                        onClick = {
-                            bookViewModel.isShowDialog = true
-                        })
-                    {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = "図鑑新規作成")
-                    }
-                }
-
+                },
+                modifier = Modifier.statusBarsPadding(),
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xFFD3A780))
+            )
+        },
+        bottomBar = {
+            BottomAppBar(
+                modifier = Modifier.fillMaxWidth(),
+                containerColor = Color(0xFFD3A780),
+                contentColor = Color(0xFFD3A780)
+            ) {
+                BottomNavigationBar(
+                    navController = navController,
+                    color = 0xFFD3A780
+                )
             }
+        },
+        floatingActionButton = {
+            if (bookViewModel.isUserBook) {
+                FloatingActionButton(
+                    onClick = {
+                        bookViewModel.isShowDialog = true
+                    })
+                {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "図鑑新規作成")
+                }
+            }
+        }
     ) {
         // innerPadding は、Scaffold コンポーネントの中で他のコンポーネントを配置する際に、その内側の余白を表す
             innerPadding ->
@@ -136,7 +135,7 @@ fun HomeScreen(
                 // pages
                 HorizontalPager(
                     state = pagerState,
-                ){ index ->
+                ) { index ->
                     when (pages[index]) {
                         CoffeeBooksPage.COFFEE_BOOKS -> {
                             bookViewModel.isUserBook = false
@@ -146,7 +145,7 @@ fun HomeScreen(
                                 onClickRow = {
 
                                 },
-                                onClickUpdate ={
+                                onClickUpdate = {
                                     bookViewModel.setEditingBook(it)
                                     bookViewModel.isShowDialog = true
                                 },
@@ -163,7 +162,7 @@ fun HomeScreen(
                                 onClickRow = {
 
                                 },
-                                onClickUpdate ={
+                                onClickUpdate = {
                                     bookViewModel.setEditingBook(it)
                                     bookViewModel.isShowDialog = true
                                 },

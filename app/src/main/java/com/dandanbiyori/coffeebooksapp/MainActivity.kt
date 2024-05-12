@@ -21,7 +21,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -29,7 +28,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.dandanbiyori.coffeebooksapp.components.BookDeteil
+import com.dandanbiyori.coffeebooksapp.components.BookDetail
 import com.dandanbiyori.coffeebooksapp.components.BookEditDialog
 import com.dandanbiyori.coffeebooksapp.components.BookItemEditDialog
 import com.dandanbiyori.coffeebooksapp.components.HomeScreen
@@ -67,15 +66,21 @@ fun MainContent(
     val context = LocalContext.current
     // TopAppBar のスクロール動作を指定するためのデフォルトの設定
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    var bookIdForDialog by remember { mutableStateOf(0) }
+
 
     if (bookViewModel.isShowDialog) {
         BookEditDialog(context)
     }
     if (bookItemViewModel.isShowDialog) {
-        BookItemEditDialog(context)
+        BookItemEditDialog(
+            context,
+            bookIdForDialog
+        )
     }
     var showFab by remember { mutableStateOf(true) }
     val books by bookViewModel.books.collectAsState(initial = emptyList())
+    val bookItems by bookItemViewModel.bookItems.collectAsState(initial = emptyList())
 
     NavHost(
         navController,
@@ -100,12 +105,13 @@ fun MainContent(
                     nullable = false
                 })
         ) { backStackEntry ->
-            BookDeteil(
-                bookId = backStackEntry.arguments?.getInt("BookId") ?: 1,
-                onClick = {navController.navigateUp()},
-                bookItemViewModel = hiltViewModel(),
-                onClickUpdate = { bookItemViewModel.isShowDialog = true}
+            BookDetail(
+                bookId = backStackEntry.arguments?.getInt("BookId") ?: 0,
+                onClickBack = {navController.navigateUp()},
+                onClickUpdate = { bookItemViewModel.isShowDialog = true},
+                bookItems = bookItems
             )
+            bookIdForDialog = backStackEntry.arguments?.getInt("BookId")!!
         }
     }
 

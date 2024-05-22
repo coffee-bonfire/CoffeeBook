@@ -110,7 +110,7 @@ fun HomeScreen(
                 )
             )
         ) {
-            Column() {
+            Column {
                 // Tab Row
                 TabRow(
                     selectedTabIndex = pagerState.currentPage

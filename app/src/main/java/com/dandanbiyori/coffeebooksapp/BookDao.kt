@@ -30,6 +30,9 @@ interface BookItemDao {
     @Query("SELECT * FROM bookItems")
     fun loadAllBookItems(): Flow<List<BookItem>>
 
+    @Query("SELECT * FROM bookItems WHERE id = :id")
+    fun getBookItem(id:Int): Flow<BookItem>
+
     @Update
     suspend fun updateBookItem(book: BookItem)
 

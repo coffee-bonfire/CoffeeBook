@@ -3,9 +3,12 @@ package com.dandanbiyori.coffeebooksapp
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -84,7 +87,6 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
 
     // distinctUntilChanged:値が同じ場合は無視する
     val bookItems = bookItemDao.loadAllBookItems().distinctUntilChanged()
-
     val isEditing: Boolean
         get() = editingBookItem != null
 
@@ -129,5 +131,22 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
         title = ""
         description = ""
         bookItemImageUri = ""
+    }
+
+    // BookItemを取得する
+    fun getBookItem(id: Int): LiveData<BookItem> {
+        // LiveDataを生成
+        val result = MutableLiveData<BookItem>()
+
+        // viewModelScope内でコルーチンを起動
+        viewModelScope.launch {
+            // DaoからFlowを取得し、最初の要素を収集
+            bookItemDao.getBookItem(id).collect { bookItem ->
+                // 収集したデータをLiveDataにポスト
+                result.postValue(bookItem)
+            }
+        }
+        // 生成したLiveDataを返す
+        return result
     }
 }

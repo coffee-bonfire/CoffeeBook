@@ -3,7 +3,9 @@ package com.dandanbiyori.coffeebooksapp.components
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -115,7 +117,7 @@ fun BookDetail(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun BookDeteilScreen (
     bookItem: BookItem,
@@ -144,7 +146,12 @@ fun BookDeteilScreen (
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
         modifier = Modifier
             .padding(horizontal = dimensionResource(id = R.dimen.card_side_margin))
-            .padding(bottom = dimensionResource(id = R.dimen.card_bottom_margin)),
+            .padding(bottom = dimensionResource(id = R.dimen.card_bottom_margin))
+            .combinedClickable(
+                onClick = {},
+                onLongClick = {},
+                onClickLabel = "画面表示"
+            ),
     ) {
         Column(Modifier.fillMaxWidth()) {
             Image(

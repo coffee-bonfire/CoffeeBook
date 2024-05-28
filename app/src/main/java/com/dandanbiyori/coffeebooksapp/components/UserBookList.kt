@@ -18,14 +18,11 @@ fun UserBookList(
     onClickDelete: (Book) -> Unit,
     navController: NavController
 ) {
-
-    // SystemBooks
-    // TODO スクロール可能にする
     LazyColumn(
         modifier = Modifier.padding(10.dp)
     ) {
         items(books) { book ->
-            if(book.type == BooksType.USER_CREATED) {
+            if (book.type == BooksType.USER_CREATED) {
                 BookRow(
                     book = book,
                     onCllickRow = onClickRow,

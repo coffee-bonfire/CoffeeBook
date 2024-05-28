@@ -110,7 +110,6 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 
     // to use swipable
-    implementation("androidx.compose.foundation:foundation:1.6.0")
-
+    implementation("me.saket.swipe:swipe:1.3.0")
 
 }

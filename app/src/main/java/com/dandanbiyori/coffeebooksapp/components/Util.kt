@@ -6,22 +6,25 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
+import com.dandanbiyori.coffeebooksapp.Book
+import com.dandanbiyori.coffeebooksapp.BookItem
 import java.io.File
 import java.io.FileOutputStream
 
 class Util {
     companion object {
-        fun convertStringToUri(uriString:String): Uri? {
-            val uri:Uri?
+        fun convertStringToUri(uriString: String): Uri? {
+            val uri: Uri?
             try {
                 uri = Uri.parse(uriString)
-            } catch (e:Exception){
+            } catch (e: Exception) {
                 e.printStackTrace()
                 return null
             }
             return uri
         }
-        fun convertUriToBitmap(uri:Uri,context: Context):Bitmap? {
+
+        fun convertUriToBitmap(uri: Uri, context: Context): Bitmap? {
             var imageBitmap: Bitmap? = null
             val contentResolver: ContentResolver = context.contentResolver
 
@@ -62,6 +65,18 @@ class Util {
             // 保存された画像のURIを文字列として返す
             return Uri.fromFile(imageFile).toString()
         }
+
+        fun deleteImageInternalStorage(imageString: String) {
+            try {
+                val imageFile = File(imageString)
+                if (imageFile.exists()) {
+                    imageFile.delete()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
     }
 
 }

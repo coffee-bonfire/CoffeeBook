@@ -39,6 +39,7 @@ import androidx.navigation.NavController
 import com.dandanbiyori.coffeebooksapp.Book
 import com.dandanbiyori.coffeebooksapp.BookViewModel
 import com.dandanbiyori.coffeebooksapp.R
+import com.dandanbiyori.coffeebooksapp.components.Util.Companion.deleteImageInternalStorage
 import kotlinx.coroutines.launch
 
 @SuppressLint("SuspiciousIndentation")
@@ -149,7 +150,10 @@ fun HomeScreen(
                                     bookViewModel.setEditingBook(it)
                                     bookViewModel.isShowDialog = true
                                 },
-                                onClickDelete = { bookViewModel.deleteBook(it) },
+                                onClickDelete = {
+                                    deleteImageInternalStorage(it.imageUri)
+                                    bookViewModel.deleteBook(it)
+                                },
                                 navController
                             )
                         }
@@ -166,7 +170,10 @@ fun HomeScreen(
                                     bookViewModel.setEditingBook(it)
                                     bookViewModel.isShowDialog = true
                                 },
-                                onClickDelete = { bookViewModel.deleteBook(it) },
+                                onClickDelete = {
+                                    deleteImageInternalStorage(it.imageUri)
+                                    bookViewModel.deleteBook(it)
+                                },
                                 navController
                             )
                         }

@@ -42,6 +42,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.navigation.NavController
 import com.dandanbiyori.coffeebooksapp.BookItem
+import com.dandanbiyori.coffeebooksapp.NavigationItem
 import com.dandanbiyori.coffeebooksapp.R
 
 // Book詳細画面（BookItem一覧）

@@ -3,12 +3,10 @@ package com.dandanbiyori.coffeebooksapp
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -85,6 +83,8 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
     var isShowDialog by mutableStateOf(false)
     private var editingBookItem: BookItem? = null
 
+    var bookItem = MutableLiveData<BookItem>()
+
     // distinctUntilChanged:値が同じ場合は無視する
     val bookItems = bookItemDao.loadAllBookItems().distinctUntilChanged()
     val isEditing: Boolean
@@ -133,20 +133,21 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
         bookItemImageUri = ""
     }
 
-    // BookItemを取得する
-    fun getBookItem(id: Int): LiveData<BookItem> {
-        // LiveDataを生成
-        val result = MutableLiveData<BookItem>()
+    // BookItemをセットする
+    fun setBookItem(id: Int){
 
         // viewModelScope内でコルーチンを起動
         viewModelScope.launch {
             // DaoからFlowを取得し、最初の要素を収集
-            bookItemDao.getBookItem(id).collect { bookItem ->
+            bookItemDao.getBookItem(id).collect {
                 // 収集したデータをLiveDataにポスト
-                result.postValue(bookItem)
+                bookItem.postValue(it)
             }
         }
-        // 生成したLiveDataを返す
-        return result
+    }
+
+    // BookItemをリセットする
+    fun resetBookItem(){
+        bookItem.value = null
     }
 }

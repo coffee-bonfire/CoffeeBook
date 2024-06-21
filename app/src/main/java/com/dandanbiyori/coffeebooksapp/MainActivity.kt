@@ -5,13 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,7 +14,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -49,7 +43,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainContent(navController = navController)
+                    MainContent(
+                        navController = navController
+                    )
                 }
             }
         }
@@ -57,12 +53,11 @@ class MainActivity : ComponentActivity() {
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainContent(
+    navController: NavHostController,
     bookViewModel: BookViewModel = hiltViewModel(),
     bookItemViewModel: BookItemViewModel = hiltViewModel(),
-    navController: NavHostController,
 ) {
     val context = LocalContext.current
     var bookIdForDialog by remember { mutableStateOf(0) }
@@ -128,21 +123,21 @@ fun MainContent(
                     nullable = false
                 })
         ) { backStackEntry ->
+            val bookItemId = backStackEntry.arguments?.getInt("BookItemId") ?: 0
+            bookItemViewModel.setBookItem(bookItemId)
+
             BookItemDetailView(
-                bookItemId = backStackEntry.arguments?.getInt("BookItemId") ?: 0,
-                onClickBack = {navController.navigateUp()},
+                bookItemId = bookItemId,
+                onClickBack = {
+                    navController.navigateUp()
+                    bookItemViewModel.resetBookItem()
+                },
                 onClickUpdate = { bookItemViewModel.isShowDialog = true},
-                bookItem = bookItemViewModel.getBookItem(backStackEntry.arguments?.getInt("BookItemId") ?: 0).value
+                bookItem = bookItemViewModel.bookItem.value
             )
             bookIdForDialog = backStackEntry.arguments?.getInt("BookItemId")!!
         }
     }
 
 
-}
-
-sealed class NavigationItem(var route: String, val icon: ImageVector?, var title: String) {
-    object Home : NavigationItem("Home", Icons.Default.Home, "Home")
-    object Setting : NavigationItem("setting", Icons.Default.Settings, "Setting")
-    object Book : NavigationItem("Book", Icons.Default.Home, "Book")
 }

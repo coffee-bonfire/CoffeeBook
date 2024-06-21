@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -36,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -50,6 +47,7 @@ import androidx.navigation.NavController
 import com.dandanbiyori.coffeebooksapp.components.Util.Companion.convertStringToUri
 import com.dandanbiyori.coffeebooksapp.components.Util.Companion.convertUriToBitmap
 import com.dandanbiyori.coffeebooksapp.Book
+import com.dandanbiyori.coffeebooksapp.NavigationItem
 import com.dandanbiyori.coffeebooksapp.R
 import me.saket.swipe.SwipeAction
 import me.saket.swipe.SwipeableActionsBox
@@ -67,7 +65,8 @@ fun BookRow(
     val uri: Uri? = convertStringToUri(book.imageUri)
     val context = LocalContext.current
     var imageBitmap: Bitmap? = null
-    var showDialog by remember { mutableStateOf(false) }
+    var showDiscribeDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     // uriをBitmapに変換
     if (uri != null) {
@@ -91,7 +90,7 @@ fun BookRow(
         background = Color.Red,
         isUndo = true,
         onSwipe = {
-            onClickDelete(book)
+            showDeleteDialog = true
         },
     )
 
@@ -115,7 +114,7 @@ fun BookRow(
                         navController.navigate("${NavigationItem.Home.route}/${book.id}")
                     },
                     onLongClick = {
-                        showDialog = true
+                        showDiscribeDialog = true
                     },
                     onClickLabel = "図鑑説明表示用ロングタップ"
                 ),
@@ -153,29 +152,42 @@ fun BookRow(
                 }
             }
             // 図鑑説明用ダイアログ表示
-            if (showDialog) {
+            if (showDiscribeDialog) {
                 AlertDialog(
-                    onDismissRequest = { showDialog = false },
+                    onDismissRequest = { showDiscribeDialog = false },
                     title = { Text(book.title) },
                     text = { Text(book.description) },
                     confirmButton = {
 
                     },
                     dismissButton = {
-                        Button(onClick = { showDialog = false }) {
+                        Button(onClick = { showDiscribeDialog = false }) {
                             Text("戻る")
                         }
                     }
                 )
             }
-
+            if (showDeleteDialog) {
+                AlertDialog(
+                    title = { Text(text ="本当に図鑑を削除しますか？")},
+                    onDismissRequest = { showDeleteDialog = false },
+                    confirmButton = {
+                        Button(onClick = {
+                            showDeleteDialog = false
+                            onClickDelete(book)
+                        }) {
+                            Text("削除する")
+                        }
+                        // 削除をここで実行する
+                    },
+                    dismissButton = {
+                        Button(onClick = { showDeleteDialog = false }) {
+                            Text("戻る")
+                        }
+                    }
+                )
+            }
         }
 
     }
-}
-
-sealed class NavigationItem(var route: String, val icon: ImageVector?, var title: String) {
-    object Home : NavigationItem("Home", Icons.Default.Home, "Home")
-    object Setting : NavigationItem("History", Icons.Default.Settings, "Setting")
-    object Book : NavigationItem("Book", Icons.Default.Home, "Book")
 }

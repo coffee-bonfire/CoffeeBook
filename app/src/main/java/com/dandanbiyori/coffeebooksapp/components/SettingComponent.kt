@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -83,14 +84,15 @@ fun SettingComponent(
             )
         ) {
             Column {
-                Column {
+                Column(
+                    modifier = Modifier.clickable {
+                        startOssLicensesMenuActivity(context)
+                    }
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp, vertical = 20.dp)
-                            .clickable {
-                                startOssLicensesMenuActivity(context)
-                            }
                     ) {
                         Text(
                             text = "バージョン情報",
@@ -100,19 +102,21 @@ fun SettingComponent(
                         Spacer(modifier = Modifier.width(10.dp))
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "version_info"
+                            contentDescription = "version_info",
+                            modifier = Modifier.align(Alignment.CenterVertically)
                         )
                         Spacer(modifier = Modifier.width(30.dp))
                     }
                 }
-                Column {
+                Column(
+                    modifier = Modifier.clickable {
+                        // todo クリック時にヘルプ画面を表示する
+                    }
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp, vertical = 20.dp)
-                            .clickable {
-                                // todo クリック時にヘルプ画面を表示する
-                            }
                     ) {
                         Text(
                             text = "ヘルプ",
@@ -122,7 +126,8 @@ fun SettingComponent(
                         Spacer(modifier = Modifier.width(10.dp))
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "version_info"
+                            contentDescription = "version_info",
+                            modifier = Modifier.align(Alignment.CenterVertically)
                         )
                         Spacer(modifier = Modifier.width(30.dp))
 

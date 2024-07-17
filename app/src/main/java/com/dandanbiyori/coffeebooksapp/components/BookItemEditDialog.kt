@@ -65,7 +65,6 @@ fun BookItemEditDialog(
     AlertDialog(
         // ダイアログ外クリックでダイアログを閉じる
         onDismissRequest = {
-            Log.e("BookItemEditDialog", "onDismissRequest")
             bookItemViewModel.isShowDialog = false
         },
         title = { Text(text = if (bookItemViewModel.isEditing) "図鑑アイテム更新" else stringResource(R.string.dialog_item_heading)) },

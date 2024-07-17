@@ -6,17 +6,19 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dandanbiyori.coffeebooksapp.components.Util
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class BookViewModel @Inject constructor(private val bookDao: BookDao):ViewModel() {
+class BookViewModel @Inject constructor(private val bookDao: BookDao) : ViewModel() {
     var title by mutableStateOf("")
     var description by mutableStateOf("")
     var bookImageUri by mutableStateOf("")
-    var type:BooksType by mutableStateOf(BooksType.USER_CREATED)
+    var type: BooksType by mutableStateOf(BooksType.USER_CREATED)
 
     var isShowDialog by mutableStateOf(false)
     var isUserBook by mutableStateOf(false)
@@ -29,14 +31,14 @@ class BookViewModel @Inject constructor(private val bookDao: BookDao):ViewModel(
     val isEditing: Boolean
         get() = editingBook != null
 
-    fun setEditingBook(book:Book){
+    fun setEditingBook(book: Book) {
         editingBook = book
         title = book.title
         description = book.description
         bookImageUri = book.imageUri
     }
 
-    fun createBook(){
+    fun createBook() {
         viewModelScope.launch {
             val newBook = Book(
                 title = title,
@@ -49,14 +51,15 @@ class BookViewModel @Inject constructor(private val bookDao: BookDao):ViewModel(
     }
 
     fun deleteBook(book: Book) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             bookDao.deleteBook(book)
+            Util.deleteImageInternalStorage(book.imageUri)
         }
     }
 
-    fun updateBook(){
-        editingBook?.let{book ->
-            viewModelScope.launch{
+    fun updateBook() {
+        editingBook?.let { book ->
+            viewModelScope.launch {
                 book.title = title
                 book.description = description
                 book.imageUri = if (bookImageUri == "") "" else bookImageUri
@@ -65,7 +68,7 @@ class BookViewModel @Inject constructor(private val bookDao: BookDao):ViewModel(
         }
     }
 
-    fun resetProperties(){
+    fun resetProperties() {
         editingBook = null
         title = ""
         description = ""
@@ -74,7 +77,7 @@ class BookViewModel @Inject constructor(private val bookDao: BookDao):ViewModel(
 }
 
 @HiltViewModel
-class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao):ViewModel() {
+class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao) : ViewModel() {
     var title by mutableStateOf("")
     var description by mutableStateOf("")
     val bookId by mutableStateOf("")
@@ -91,7 +94,7 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
         get() = editingBookItem != null
 
 
-    fun createBookItem(bookId:Int){
+    fun createBookItem(bookId: Int) {
         viewModelScope.launch {
             val newBookItem = BookItem(
                 title = title,
@@ -102,7 +105,8 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
             bookItemDao.insertBookItem(newBookItem)
         }
     }
-    fun setEditingBookItem(bookItem:BookItem){
+
+    fun setEditingBookItem(bookItem: BookItem) {
         editingBookItem = bookItem
         title = bookItem.title
         description = bookItem.description
@@ -115,9 +119,9 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
         }
     }
 
-    fun updateBook(){
-        editingBookItem?.let{bookItem ->
-            viewModelScope.launch{
+    fun updateBook() {
+        editingBookItem?.let { bookItem ->
+            viewModelScope.launch {
                 bookItem.title = title
                 bookItem.description = description
                 bookItem.imageUri = if (bookItemImageUri == "") "" else bookItemImageUri
@@ -126,7 +130,7 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
         }
     }
 
-    fun resetProperties(){
+    fun resetProperties() {
         editingBookItem = null
         title = ""
         description = ""
@@ -134,7 +138,7 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
     }
 
     // BookItemをセットする
-    fun setBookItem(id: Int){
+    fun setBookItem(id: Int) {
 
         // viewModelScope内でコルーチンを起動
         viewModelScope.launch {
@@ -147,7 +151,7 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
     }
 
     // BookItemをリセットする
-    fun resetBookItem(){
+    fun resetBookItem() {
         bookItem.value = null
     }
 }

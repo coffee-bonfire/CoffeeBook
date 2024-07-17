@@ -39,7 +39,6 @@ import androidx.navigation.NavController
 import com.dandanbiyori.coffeebooksapp.Book
 import com.dandanbiyori.coffeebooksapp.BookViewModel
 import com.dandanbiyori.coffeebooksapp.R
-import com.dandanbiyori.coffeebooksapp.components.Util.Companion.deleteImageInternalStorage
 import kotlinx.coroutines.launch
 
 @SuppressLint("SuspiciousIndentation")
@@ -87,6 +86,7 @@ fun HomeScreen(
                 )
             }
         },
+        // :bug: TODO CoffeeBookでも出てしまう時があった
         floatingActionButton = {
             if (bookViewModel.isUserBook) {
                 FloatingActionButton(
@@ -151,8 +151,7 @@ fun HomeScreen(
                                     bookViewModel.isShowDialog = true
                                 },
                                 onClickDelete = {
-                                    deleteImageInternalStorage(it.imageUri)
-                                    bookViewModel.deleteBook(it)
+
                                 },
                                 navController
                             )
@@ -171,7 +170,6 @@ fun HomeScreen(
                                     bookViewModel.isShowDialog = true
                                 },
                                 onClickDelete = {
-                                    deleteImageInternalStorage(it.imageUri)
                                     bookViewModel.deleteBook(it)
                                 },
                                 navController

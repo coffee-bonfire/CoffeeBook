@@ -52,6 +52,7 @@ import com.dandanbiyori.coffeebooksapp.R
 import me.saket.swipe.SwipeAction
 import me.saket.swipe.SwipeableActionsBox
 
+// 図鑑アイテム表示用Card
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BookRow(
@@ -59,8 +60,8 @@ fun BookRow(
     onCllickRow: (Book) -> Unit,
     onClickUpdate: (Book) -> Unit,
     onClickDelete: (Book) -> Unit,
-    navController: NavController
-) {
+    navController: NavController,
+    ) {
     // ストレージに保存してあるパスからuriを作成
     val uri: Uri? = convertStringToUri(book.imageUri)
     val context = LocalContext.current
@@ -69,7 +70,7 @@ fun BookRow(
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     // uriをBitmapに変換
-    if (uri != null) {
+    if (uri != null && uri.toString().isNotEmpty()) {
         imageBitmap = convertUriToBitmap(uri, context)
     }
 
@@ -86,7 +87,14 @@ fun BookRow(
     )
 
     val snooze = SwipeAction(
-        icon = { Text("削除する") },
+        icon = {
+            Text(
+                modifier = Modifier.padding(start = 20.dp),
+                text = "削除する",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+            )
+        },
         background = Color.Red,
         isUndo = true,
         onSwipe = {
@@ -172,13 +180,14 @@ fun BookRow(
                     title = { Text(text ="本当に図鑑を削除しますか？")},
                     onDismissRequest = { showDeleteDialog = false },
                     confirmButton = {
-                        Button(onClick = {
+                        Button(
+                            onClick = {
                             showDeleteDialog = false
                             onClickDelete(book)
                         }) {
                             Text("削除する")
                         }
-                        // 削除をここで実行する
+                        // TODO 図鑑の画像も削除が必要
                     },
                     dismissButton = {
                         Button(onClick = { showDeleteDialog = false }) {

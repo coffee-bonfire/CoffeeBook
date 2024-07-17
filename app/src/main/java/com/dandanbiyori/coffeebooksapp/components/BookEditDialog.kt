@@ -43,9 +43,8 @@ import coil.compose.rememberAsyncImagePainter
 import com.dandanbiyori.coffeebooksapp.BookViewModel
 import com.dandanbiyori.coffeebooksapp.components.Util.Companion.convertStringToUri
 import com.dandanbiyori.coffeebooksapp.R
-import com.dandanbiyori.coffeebooksapp.components.Util.Companion.saveImageToInternalStorage
+import com.dandanbiyori.coffeebooksapp.components.Util.Companion.saveBookImageToInternalStorage
 import java.io.File
-import java.io.FileOutputStream
 
 // 図鑑作成ダイアログ画面
 @OptIn(ExperimentalMaterial3Api::class)
@@ -121,7 +120,7 @@ fun BookEditDialog(
                                 if (file.exists()) {
                                     file.delete()
                                 }
-                                val savedImageUri = saveImageToInternalStorage(newUri, context)
+                                val savedImageUri = saveBookImageToInternalStorage(newUri, context)
                                 bookViewModel.bookImageUri = savedImageUri
                             }
                             bookViewModel.updateBook()
@@ -130,7 +129,7 @@ fun BookEditDialog(
                             // 画像を選択している場合は画像を保存
                             selectedImageUri?.let { uri ->
                                 // 選択された画像を内部ストレージに保存し、URIをViewModelに設定
-                                val savedImageUri = saveImageToInternalStorage(uri, context)
+                                val savedImageUri = saveBookImageToInternalStorage(uri, context)
                                 bookViewModel.bookImageUri = savedImageUri
                             }
                             bookViewModel.createBook()

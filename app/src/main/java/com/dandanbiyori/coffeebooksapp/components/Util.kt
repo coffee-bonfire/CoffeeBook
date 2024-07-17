@@ -6,8 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
-import com.dandanbiyori.coffeebooksapp.Book
-import com.dandanbiyori.coffeebooksapp.BookItem
+import android.util.Log
 import java.io.File
 import java.io.FileOutputStream
 
@@ -51,10 +50,36 @@ class Util {
             return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
         }
 
-        fun saveImageToInternalStorage(uri: Uri, context: Context): String {
+        fun saveBookImageToInternalStorage(uri: Uri, context: Context): String {
             val imageFileName = "image_${System.currentTimeMillis()}.jpg"
-            val internalStorageDir = context.filesDir
-            val imageFile = File(internalStorageDir, imageFileName)
+            val booksDir = File(context.filesDir, "Books")
+            if (!booksDir.exists()) {
+                booksDir.mkdirs()
+            }
+
+            val imageFile = File(booksDir, imageFileName)
+
+            // 画像を内部ストレージに保存
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                FileOutputStream(imageFile).use { output ->
+                    input.copyTo(output)
+                }
+            }
+            // 保存された画像のURIを文字列として返す
+            return Uri.fromFile(imageFile).toString()
+        }
+
+        fun saveBookItemImageToInternalStorage(
+            uri: Uri,
+            context: Context
+        ): String {
+            val imageFileName = "image_${System.currentTimeMillis()}.jpg"
+            val bookItemsDir = File(context.filesDir, "BookItems")
+            if (!bookItemsDir.exists()) {
+                bookItemsDir.mkdirs()
+            }
+
+            val imageFile = File(bookItemsDir, imageFileName)
 
             // 画像を内部ストレージに保存
             context.contentResolver.openInputStream(uri)?.use { input ->

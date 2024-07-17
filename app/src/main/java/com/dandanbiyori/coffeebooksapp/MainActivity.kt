@@ -2,6 +2,7 @@ package com.dandanbiyori.coffeebooksapp
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -102,9 +103,15 @@ fun MainContent(
             BookDetail(
                 bookId = backStackEntry.arguments?.getInt("BookId") ?: 0,
                 onClickBack = {navController.navigateUp()},
-                onClickUpdate = { bookItemViewModel.isShowDialog = true},
+                onClickUpdate = {
+                    bookItemViewModel.isShowDialog = true
+                    bookItemViewModel.setEditingBookItem(it)
+                },
                 bookItems = bookItems,
-                navController = navController
+                onClickOpenDialog = {
+                    bookItemViewModel.isShowDialog = true
+                },
+                navController = navController,
             )
             bookIdForDialog = backStackEntry.arguments?.getInt("BookId")!!
         }

@@ -12,12 +12,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,10 +40,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dandanbiyori.coffeebooksapp.BookItem
+import com.dandanbiyori.coffeebooksapp.BookItemViewModel
 import com.dandanbiyori.coffeebooksapp.NavigationItem
 import com.dandanbiyori.coffeebooksapp.R
 
@@ -51,9 +56,11 @@ import com.dandanbiyori.coffeebooksapp.R
 fun BookDetail(
     bookId: Int,
     onClickBack: () -> Unit,
-    onClickUpdate: () -> Unit,
+    onClickUpdate: (BookItem) -> Unit,
     bookItems : List<BookItem>,
-    navController : NavController
+    navController : NavController,
+    onClickOpenDialog: () -> Unit,
+    bookItemViewModel: BookItemViewModel = hiltViewModel(),
 ){
     val targetBookItems = mutableListOf<BookItem>()
 
@@ -80,18 +87,17 @@ fun BookDetail(
         },
         floatingActionButton = {
             FloatingActionButton(
+                onClick = {
+                    onClickOpenDialog()
+                },
                 contentColor = Color(0xFFD3A780),
                 containerColor = Color(0xFFD3A780),
-                onClick = {
-                    onClickUpdate()
-                })
-            {
+            ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "図鑑アイテム作成・更新",
                     tint = Color.Black
-                )
-            }
+                )}
         }
 
     ) { padding ->
@@ -109,7 +115,8 @@ fun BookDetail(
                         BookDeteilScreen(
                             targetBookItems[index],
                             bookId,
-                            navController
+                            navController,
+                            onClickUpdate
                         )
                     }
                 )
@@ -118,19 +125,21 @@ fun BookDetail(
     }
 }
 
+// 各BookItemのCard
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun BookDeteilScreen (
     bookItem: BookItem,
     bookId: Int,
-    navController: NavController
+    navController: NavController,
+    onClickUpdate: (BookItem) -> Unit
 ){
     var imageBitmap: Bitmap? = null
     val context = LocalContext.current
     val uri: Uri? = bookItem.let { Util.convertStringToUri(it.imageUri) }
 
     // uriをBitmapに変換
-    if (uri != null){
+    if (uri != null && uri.toString().isNotEmpty()) {
         imageBitmap = Util.convertUriToBitmap(uri, context)
     }
 
@@ -155,14 +164,25 @@ fun BookDeteilScreen (
             ),
     ) {
         Column(Modifier.fillMaxWidth()) {
-            Image(
-                bitmap = imageBitmap!!.asImageBitmap(),
-                contentDescription = "bookdetail ",
-                Modifier
-                    .fillMaxWidth()
-                    .height(dimensionResource(id = R.dimen.book_item_image_height)),
-                contentScale = ContentScale.Crop
-            )
+            Box(modifier = Modifier.fillMaxWidth()){
+                Image(
+                    bitmap = imageBitmap!!.asImageBitmap(),
+                    contentDescription = "bookdetail",
+                    Modifier
+                        .fillMaxWidth()
+                        .height(dimensionResource(id = R.dimen.book_item_image_height)),
+                    contentScale = ContentScale.Crop
+                )
+                IconButton(
+                    onClick = {
+                        // TODO onClickUpdateでダイアログが表示されないため修正が必要
+                        onClickUpdate(bookItem)
+                    },
+                    modifier = Modifier.size(24.dp).align(Alignment.TopEnd),
+                ) {
+                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Book edit")
+                }
+            }
             Text(
                 text = bookItem.title,
                 textAlign = TextAlign.Center,
@@ -175,5 +195,4 @@ fun BookDeteilScreen (
             )
         }
     }
-
 }

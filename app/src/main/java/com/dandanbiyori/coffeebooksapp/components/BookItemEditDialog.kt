@@ -2,6 +2,7 @@ package com.dandanbiyori.coffeebooksapp.components
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -42,7 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.dandanbiyori.coffeebooksapp.BookItemViewModel
 import com.dandanbiyori.coffeebooksapp.R
-import com.dandanbiyori.coffeebooksapp.components.Util.Companion.saveImageToInternalStorage
+import com.dandanbiyori.coffeebooksapp.components.Util.Companion.saveBookItemImageToInternalStorage
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,7 +64,10 @@ fun BookItemEditDialog(
 
     AlertDialog(
         // ダイアログ外クリックでダイアログを閉じる
-        onDismissRequest = { bookItemViewModel.isShowDialog = false },
+        onDismissRequest = {
+            Log.e("BookItemEditDialog", "onDismissRequest")
+            bookItemViewModel.isShowDialog = false
+        },
         title = { Text(text = if (bookItemViewModel.isEditing) "図鑑アイテム更新" else stringResource(R.string.dialog_item_heading)) },
         text = {
             Column(
@@ -120,7 +124,7 @@ fun BookItemEditDialog(
                                 if (file.exists()) {
                                     file.delete()
                                 }
-                                val savedImageUri = saveImageToInternalStorage(newUri, context)
+                                val savedImageUri = saveBookItemImageToInternalStorage(newUri, context)
                                 bookItemViewModel.bookItemImageUri = savedImageUri
                             }
                             bookItemViewModel.updateBook()
@@ -129,7 +133,7 @@ fun BookItemEditDialog(
                             // 画像を選択している場合は画像を保存
                             selectedImageUri?.let { uri ->
                                 // 選択された画像を内部ストレージに保存し、URIをViewModelに設定
-                                val savedImageUri = saveImageToInternalStorage(uri, context)
+                                val savedImageUri = saveBookItemImageToInternalStorage(uri, context)
                                 bookItemViewModel.bookItemImageUri = savedImageUri
                             }
                             bookItemViewModel.createBookItem(bookIdForDialog)

@@ -95,7 +95,7 @@ fun SettingComponent(
                             .padding(horizontal = 20.dp, vertical = 20.dp)
                     ) {
                         Text(
-                            text = "バージョン情報",
+                            text = "ライセンス情報",
                             fontSize = 20.sp,
                             textAlign = TextAlign.Left,
                         )

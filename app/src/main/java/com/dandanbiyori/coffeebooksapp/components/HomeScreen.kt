@@ -86,16 +86,13 @@ fun HomeScreen(
                 )
             }
         },
-        // :bug: TODO CoffeeBookでも出てしまう時があった
         floatingActionButton = {
-            if (bookViewModel.isUserBook) {
-                FloatingActionButton(
-                    onClick = {
-                        bookViewModel.isShowDialog = true
-                    })
-                {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "図鑑新規作成")
-                }
+            FloatingActionButton(
+                onClick = {
+                    bookViewModel.isShowDialog = true
+                })
+            {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "図鑑新規作成")
             }
         }
     ) {

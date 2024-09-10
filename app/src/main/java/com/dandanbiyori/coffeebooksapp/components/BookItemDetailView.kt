@@ -190,10 +190,12 @@ fun BookItemDetailContent(
                                 .height(300.dp), // 高さを指定
                             maxLines = 10, // 最大行数を指定
                             textStyle = androidx.compose.ui.text.TextStyle(
-                                fontSize = 20.sp,fontFamily = fontFamily)
+                                fontSize = 20.sp,fontFamily = fontFamily
+                            )
                         )
                         Text(
                             text = "${text.length}/$maxChars",
+                            color = if(text.length == maxChars) Color.Red else Color.Gray,
                             modifier = Modifier.align(Alignment.End)
                         )
                     }

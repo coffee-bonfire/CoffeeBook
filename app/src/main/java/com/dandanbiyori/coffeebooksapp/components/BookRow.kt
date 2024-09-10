@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -80,13 +79,7 @@ fun BookRow(
         imageBitmap = drawable?.toBitmap()
     }
 
-    val archive = SwipeAction(
-        icon = rememberVectorPainter(Icons.Default.Build),
-        background = Color.Green,
-        onSwipe = { }
-    )
-
-    val snooze = SwipeAction(
+    val deleteBookAction = SwipeAction(
         icon = {
             Text(
                 modifier = Modifier.padding(start = 20.dp),
@@ -103,8 +96,7 @@ fun BookRow(
     )
 
     SwipeableActionsBox(
-        startActions = listOf(archive),
-        endActions = listOf(snooze)
+        endActions = listOf(deleteBookAction)
     ) {
         // Swipeable content goes here.
         Card(
@@ -180,7 +172,7 @@ fun BookRow(
                         { Text(book.description) }
                     },
                     confirmButton = {
-
+                        // 何もしない
                     },
                     dismissButton = {
                         Button(onClick = { showDiscribeDialog = false }) {

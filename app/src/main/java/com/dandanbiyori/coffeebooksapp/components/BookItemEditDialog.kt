@@ -53,6 +53,7 @@ fun BookItemEditDialog(
     bookIdForDialog:Int,
     bookItemViewModel: BookItemViewModel = hiltViewModel(),
 ) {
+    Log.e("BookItemEditDialog", "呼び出された")
     // EditDialogが非表示になるタイミングで実行される
     // 保持しているviewModelの値をクリアする
     DisposableEffect(Unit){
@@ -61,6 +62,7 @@ fun BookItemEditDialog(
         }
     }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    val maxTitleLength = 20
 
     AlertDialog(
         // ダイアログ外クリックでダイアログを閉じる
@@ -84,7 +86,11 @@ fun BookItemEditDialog(
                 Text(text = stringResource(R.string.dialog_title))
                 TextField(
                     value = bookItemViewModel.title,
-                    onValueChange = { bookItemViewModel.title = it }
+                    onValueChange = {
+                        if (it.length <= maxTitleLength){
+                            bookItemViewModel.title = it
+                        }
+                    }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = stringResource(R.string.dialog_description))
@@ -126,7 +132,7 @@ fun BookItemEditDialog(
                                 val savedImageUri = saveBookItemImageToInternalStorage(newUri, context)
                                 bookItemViewModel.bookItemImageUri = savedImageUri
                             }
-                            bookItemViewModel.updateBook()
+                            bookItemViewModel.updateBookItem()
 
                         } else {
                             // 画像を選択している場合は画像を保存

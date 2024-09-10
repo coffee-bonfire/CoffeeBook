@@ -61,7 +61,7 @@ fun BookRow(
     onClickUpdate: (Book) -> Unit,
     onClickDelete: (Book) -> Unit,
     navController: NavController,
-    ) {
+) {
     // ストレージに保存してあるパスからuriを作成
     val uri: Uri? = convertStringToUri(book.imageUri)
     val context = LocalContext.current
@@ -142,7 +142,12 @@ fun BookRow(
                     modifier = Modifier.weight(1f),
                 ) {
                     Text(
-                        text = book.title,
+                        // タイトルが長すぎる場合は省略する
+                        text = if (book.title.length > 10) {
+                            book.title.substring(0, 10) + "..."
+                        } else {
+                            book.title
+                        },
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
                             fontSize = 24.sp,
@@ -163,8 +168,17 @@ fun BookRow(
             if (showDiscribeDialog) {
                 AlertDialog(
                     onDismissRequest = { showDiscribeDialog = false },
-                    title = { Text(book.title) },
-                    text = { Text(book.description) },
+                    title = if (book.title.length > 10) {
+                        { Text(book.title.substring(0, 10) + "...") }
+                    } else {
+                        { Text(book.title) }
+                    },
+
+                    text = if (book.description.length > 100) {
+                        { Text(book.description.substring(0, 10) + "...") }
+                    } else {
+                        { Text(book.description) }
+                    },
                     confirmButton = {
 
                     },
@@ -177,14 +191,14 @@ fun BookRow(
             }
             if (showDeleteDialog) {
                 AlertDialog(
-                    title = { Text(text ="本当に図鑑を削除しますか？")},
+                    title = { Text(text = "本当に図鑑を削除しますか？") },
                     onDismissRequest = { showDeleteDialog = false },
                     confirmButton = {
                         Button(
                             onClick = {
-                            showDeleteDialog = false
-                            onClickDelete(book)
-                        }) {
+                                showDeleteDialog = false
+                                onClickDelete(book)
+                            }) {
                             Text("削除する")
                         }
                         // TODO 図鑑の画像も削除が必要

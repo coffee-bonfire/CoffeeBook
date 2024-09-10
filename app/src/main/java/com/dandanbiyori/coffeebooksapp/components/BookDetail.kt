@@ -3,6 +3,7 @@ package com.dandanbiyori.coffeebooksapp.components
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
@@ -62,6 +63,8 @@ fun BookDetail(
     onClickOpenDialog: () -> Unit,
     bookItemViewModel: BookItemViewModel = hiltViewModel(),
 ){
+    Log.e("BookDetail", "呼び出された")
+
     val targetBookItems = mutableListOf<BookItem>()
 
     bookItems.forEach{ bookItem ->
@@ -132,8 +135,10 @@ fun BookDeteilScreen (
     bookItem: BookItem,
     bookId: Int,
     navController: NavController,
-    onClickUpdate: (BookItem) -> Unit
+    onClickUpdate: (BookItem) -> Unit,
+    bookItemViewModel: BookItemViewModel = hiltViewModel(),
 ){
+    Log.e("BookDeteilScreen", "呼び出された")
     var imageBitmap: Bitmap? = null
     val context = LocalContext.current
     val uri: Uri? = bookItem.let { Util.convertStringToUri(it.imageUri) }
@@ -184,7 +189,12 @@ fun BookDeteilScreen (
                 }
             }
             Text(
-                text = bookItem.title,
+                // 10文字を超過したら省略
+                text = if (bookItem.title.length > 10){
+                    bookItem.title.substring(0, 10) + "..."
+                } else {
+                    bookItem.title
+                },
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 style = MaterialTheme.typography.titleMedium,

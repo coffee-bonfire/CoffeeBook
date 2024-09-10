@@ -55,12 +55,13 @@ fun BookEditDialog(
 ) {
     // EditDialogが非表示になるタイミングで実行される
     // 保持しているviewModelの値をクリアする
-    DisposableEffect(Unit){
+    DisposableEffect(Unit) {
         onDispose {
             bookViewModel.resetProperties()
         }
     }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    val maxTitleLength = 20
 
     AlertDialog(
         onDismissRequest = { bookViewModel.isShowDialog = false },
@@ -81,7 +82,11 @@ fun BookEditDialog(
                 Text(text = stringResource(R.string.dialog_title))
                 TextField(
                     value = bookViewModel.title,
-                    onValueChange = { bookViewModel.title = it }
+                    onValueChange = {
+                        if (it.length <= maxTitleLength) {
+                            bookViewModel.title = it
+                        }
+                    }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = stringResource(R.string.dialog_description))
@@ -185,7 +190,7 @@ fun LoadImage(onImageLoaded: (Uri) -> Unit, bookImageUriString: String) {
         }
 
         if (selectedImageUri == null) {
-            if (bookImageUri != ""){
+            if (bookImageUri != "") {
                 Spacer(modifier = Modifier.width(10.dp))
                 Image(
                     painter = rememberAsyncImagePainter(bookImageUri),

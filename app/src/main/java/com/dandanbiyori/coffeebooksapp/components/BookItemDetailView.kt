@@ -4,6 +4,7 @@ package com.dandanbiyori.coffeebooksapp.components
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -24,44 +25,56 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.dandanbiyori.coffeebooksapp.BookItem
+import com.dandanbiyori.coffeebooksapp.BookItemViewModel
 import com.dandanbiyori.coffeebooksapp.R
 
 @Composable
 fun BookItemDetailView(
-    bookItemId: Int,
     onClickBack: () -> Unit,
-    onClickUpdate: () -> Unit,
-    bookItem: BookItem?
+    onClickEdit: (BookItem) -> Unit,
+    bookItem: BookItem,
+    bookItemViewModel: BookItemViewModel
 ) {
+    Log.e("BookItemDetailView", "呼び出された")
+
     val scrollState = rememberScrollState()
     Box(
         modifier = Modifier.fillMaxSize()
     ){
-        if (bookItem != null) {
-            BookItemDetailContent(
-                bookItem,
-                scrollState
-            )
-        }
+        BookItemDetailContent(
+            bookItem,
+            scrollState,
+            onClickEdit,
+            bookItemViewModel
+        )
         BookItemDetailTopBar(
             onClickBack,
         )
@@ -105,11 +118,22 @@ fun BookItemDetailTopBar(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookItemDetailContent(
-    bookItem: BookItem?,
+    bookItem: BookItem,
     scrollState: ScrollState,
+    onClickEdit:(BookItem) -> Unit,
+    bookItemViewModel: BookItemViewModel
 ) {
+    Log.e("BookItemDetailContent", "呼び出された")
+
+    var text by remember { mutableStateOf("") }
+    val maxChars = 200
+    val switchInputFlag = remember { mutableStateOf(false) }
+    val fontFamily = FontFamily.Monospace
+    text = bookItem.description
+
     Column(Modifier.verticalScroll(scrollState)) {
         ConstraintLayout {
             Column(
@@ -120,7 +144,12 @@ fun BookItemDetailContent(
                 // title
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = bookItem!!.title,
+                    // 10文字を超過したら省略
+                    text = if (bookItem.title.length > 10){
+                        bookItem.title.substring(0, 10) + "..."
+                    } else {
+                        bookItem.title
+                    },
                     color = Color.Gray,
                     fontSize = 30.sp,
                     fontWeight = FontWeight.ExtraBold,
@@ -133,12 +162,77 @@ fun BookItemDetailContent(
                         .fillMaxWidth()
                         .padding(20.dp, 0.dp),
                 ) {
-                    Text(
-                        text = bookItem.description,
-                        color = Color.Gray,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                    )
+                    if (!switchInputFlag.value) {
+                        Log.e("text.description", "呼び出された")
+                        Text(
+                            text = bookItem.description,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp),// 高さを指定
+                            maxLines = 10 // 最大行数を指定
+                        )
+                    } else {
+                        Log.e("OutlinedTextField.description", "呼び出された")
+                        OutlinedTextField(
+                            value = text,
+                            onValueChange = {
+                                // 200文字を超えないようにする
+                                if (it.length <= maxChars){
+                                    text = it
+                                    bookItemViewModel.description = it
+                                }
+                            },
+                            label = { Text("図鑑の説明") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp), // 高さを指定
+                            maxLines = 10, // 最大行数を指定
+                            textStyle = androidx.compose.ui.text.TextStyle(
+                                fontSize = 20.sp,fontFamily = fontFamily)
+                        )
+                        Text(
+                            text = "${text.length}/$maxChars",
+                            modifier = Modifier.align(Alignment.End)
+                        )
+                    }
+
+                    Row {
+                        Spacer(modifier = Modifier.weight(1f)) // 空白を挿入
+                        if (!switchInputFlag.value) {
+                            Button(
+                                onClick = {
+                                    Log.e("Button.book", bookItem.title)
+                                    switchInputFlag.value = true
+                                    onClickEdit(bookItem)
+                                },
+                            ) {
+                                Text("編集")
+                            }
+                        } else {
+                            Button(
+                                onClick = {
+                                    // ユーザ入力値でDB更新
+                                    bookItemViewModel.updateBookItem()
+                                    text = bookItem.description
+                                    switchInputFlag.value = false
+                                },
+                            ) {
+                                Text("保存")
+                            }
+                            Button(
+                                onClick = {
+                                    switchInputFlag.value = false
+                                    text = bookItem.description
+                                },
+                            ) {
+                                Text("戻る")
+                            }
+                        }
+
+                    }
+
                 }
 
             }

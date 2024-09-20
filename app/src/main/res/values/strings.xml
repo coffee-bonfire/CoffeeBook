@@ -1,13 +1,13 @@
 <resources>
     <string name="app_name">CoffeeBooksApp</string>
-    <string name="dialog_cancel">キャンセル</string>
-    <string name="dialog_title">タイトル</string>
-    <string name="dialog_description">詳細</string>
-    <string name="dialog_heading">図鑑新規作成</string>
-    <string name="dialog_item_heading">図鑑アイテム新規作成</string>
-    <string name="dialog_user_select_image">ユーザ画像</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_title">title</string>
+    <string name="dialog_description">Detail</string>
+    <string name="dialog_heading">Create New Book</string>
+    <string name="dialog_item_heading">Create New BookItem</string>
+    <string name="dialog_user_select_image">UserImages</string>
     <string name="tab_coffee_books">Coffee Book</string>
     <string name="tab_my_books">My Book</string>
-    <string name="app_setting">設定</string>
+    <string name="app_setting">Setting</string>
 
 </resources>

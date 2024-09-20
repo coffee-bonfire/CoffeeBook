@@ -7,6 +7,11 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+.idea/appInsightsSettings.xml
+.idea/gradle.xml
+.idea/other.xml
+.idea/deploymentTargetSelector.xml
+.idea/studiobot.xml
 .idea/deploymentTargetDropDown.xml
 .idea/inspectionProfiles/
 .DS_Store

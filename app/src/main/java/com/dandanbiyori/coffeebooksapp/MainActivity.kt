@@ -23,11 +23,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.dandanbiyori.coffeebooksapp.Util.Companion.deleteImageInternalStorage
 import com.dandanbiyori.coffeebooksapp.components.BookDetail
 import com.dandanbiyori.coffeebooksapp.components.BookEditDialog
 import com.dandanbiyori.coffeebooksapp.components.BookItemDetailView
 import com.dandanbiyori.coffeebooksapp.components.BookItemEditDialog
 import com.dandanbiyori.coffeebooksapp.components.HomeScreen
+import com.dandanbiyori.coffeebooksapp.components.NoBookItemDetailView
 import com.dandanbiyori.coffeebooksapp.components.SettingComponent
 import com.dandanbiyori.coffeebooksapp.ui.theme.CoffeeBooksAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -60,6 +62,7 @@ fun MainContent(
     bookViewModel: BookViewModel = hiltViewModel(),
     bookItemViewModel: BookItemViewModel = hiltViewModel(),
 ) {
+    Log.e("MainContent", "呼び出された")
     val context = LocalContext.current
     var bookIdForDialog by remember { mutableStateOf(0) }
 
@@ -84,7 +87,7 @@ fun MainContent(
         // 画面遷移をコントロール
         // 図鑑表示画面
         composable(NavigationItem.Home.route) {
-            HomeScreen(books, bookViewModel,navController)
+            HomeScreen(books, bookViewModel, navController)
         }
         // Setting画面
         composable(NavigationItem.Setting.route) {
@@ -102,7 +105,7 @@ fun MainContent(
         ) { backStackEntry ->
             BookDetail(
                 bookId = backStackEntry.arguments?.getInt("BookId") ?: 0,
-                onClickBack = {navController.navigateUp()},
+                onClickBack = { navController.navigateUp() },
                 onClickUpdate = {
                     bookItemViewModel.isShowDialog = true
                     bookItemViewModel.setEditingBookItem(it)
@@ -112,6 +115,10 @@ fun MainContent(
                     bookItemViewModel.isShowDialog = true
                 },
                 navController = navController,
+                onClickDelete = {
+                    bookItemViewModel.deleteBookItem(it)
+                    deleteImageInternalStorage(it.imageUri)
+                }
             )
             bookIdForDialog = backStackEntry.arguments?.getInt("BookId")!!
         }
@@ -133,15 +140,20 @@ fun MainContent(
             val bookItemId = backStackEntry.arguments?.getInt("BookItemId") ?: 0
             bookItemViewModel.setBookItem(bookItemId)
 
-            BookItemDetailView(
-                bookItemId = bookItemId,
-                onClickBack = {
-                    navController.navigateUp()
-                    bookItemViewModel.resetBookItem()
-                },
-                onClickUpdate = { bookItemViewModel.isShowDialog = true},
-                bookItem = bookItemViewModel.bookItem.value
-            )
+            if (bookItemViewModel.bookItem.value != null) {
+                bookItemViewModel.setEditingBookItem(bookItemViewModel.bookItem.value!!)
+                BookItemDetailView(
+                    onClickBack = {
+                        navController.navigateUp()
+                        bookItemViewModel.resetBookItem()
+                    },
+                    onClickEdit = {
+                        bookItemViewModel.setEditingBookItem(it)
+                    },
+                    bookItem = bookItemViewModel.bookItem.value!!,
+                    bookItemViewModel
+                )
+            }
             bookIdForDialog = backStackEntry.arguments?.getInt("BookItemId")!!
         }
     }

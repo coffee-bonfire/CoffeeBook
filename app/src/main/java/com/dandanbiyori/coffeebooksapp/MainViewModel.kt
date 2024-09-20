@@ -1,12 +1,12 @@
 package com.dandanbiyori.coffeebooksapp
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dandanbiyori.coffeebooksapp.components.Util
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -111,6 +111,7 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
         title = bookItem.title
         description = bookItem.description
         bookItemImageUri = bookItem.imageUri
+        Log.e("setEditingBookItem","BookItemがセットされました。")
     }
 
     fun deleteBookItem(bookItem: BookItem) {
@@ -119,7 +120,7 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
         }
     }
 
-    fun updateBook() {
+    fun updateBookItem() {
         editingBookItem?.let { bookItem ->
             viewModelScope.launch {
                 bookItem.title = title

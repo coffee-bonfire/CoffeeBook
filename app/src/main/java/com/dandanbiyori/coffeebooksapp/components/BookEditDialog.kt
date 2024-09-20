@@ -41,9 +41,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.dandanbiyori.coffeebooksapp.BookViewModel
-import com.dandanbiyori.coffeebooksapp.components.Util.Companion.convertStringToUri
+import com.dandanbiyori.coffeebooksapp.Util.Companion.convertStringToUri
 import com.dandanbiyori.coffeebooksapp.R
-import com.dandanbiyori.coffeebooksapp.components.Util.Companion.saveBookImageToInternalStorage
+import com.dandanbiyori.coffeebooksapp.Util.Companion.saveBookImageToInternalStorage
 import java.io.File
 
 // 図鑑作成ダイアログ画面
@@ -65,7 +65,7 @@ fun BookEditDialog(
 
     AlertDialog(
         onDismissRequest = { bookViewModel.isShowDialog = false },
-        title = { Text(text = if (bookViewModel.isEditing) "図鑑更新" else stringResource(R.string.dialog_heading)) },
+        title = { Text(text = if (bookViewModel.isEditing) "Update Book" else stringResource(R.string.dialog_heading)) },
         text = {
             Column(
                 modifier = Modifier

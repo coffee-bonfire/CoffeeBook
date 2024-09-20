@@ -16,11 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -33,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -43,8 +44,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.navigation.NavController
-import com.dandanbiyori.coffeebooksapp.components.Util.Companion.convertStringToUri
-import com.dandanbiyori.coffeebooksapp.components.Util.Companion.convertUriToBitmap
+import com.dandanbiyori.coffeebooksapp.Util.Companion.convertStringToUri
+import com.dandanbiyori.coffeebooksapp.Util.Companion.convertUriToBitmap
 import com.dandanbiyori.coffeebooksapp.Book
 import com.dandanbiyori.coffeebooksapp.NavigationItem
 import com.dandanbiyori.coffeebooksapp.R
@@ -67,6 +68,9 @@ fun BookRow(
     var imageBitmap: Bitmap? = null
     var showDiscribeDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+
+    var expanded by remember { mutableStateOf(false) }
+    var selectedOption by remember { mutableStateOf<String?>(null) }
 
     // uriをBitmapに変換
     if (uri != null && uri.toString().isNotEmpty()) {
@@ -147,62 +151,86 @@ fun BookRow(
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                IconButton(
-                    onClick = {
-                        onClickUpdate(book)
-                    },
-                    modifier = Modifier.size(24.dp),
-                ) {
-                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Book edit")
+
+                Column {
+                    IconButton(
+                        onClick = {
+                            expanded = true
+                        },
+                        modifier = Modifier.size(24.dp),
+                    ) {
+                        Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Book edit")
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Edit") },
+                            onClick = {
+                                expanded = false
+                                selectedOption = "edit"
+                                onClickUpdate(book)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Delete") },
+                            onClick = {
+                                expanded = false
+                                selectedOption = "delete"
+                                showDeleteDialog = true
+                            }
+                        )
+                    }
+
+                }
+                // 図鑑説明用ダイアログ表示
+                if (showDiscribeDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showDiscribeDialog = false },
+                        title = if (book.title.length > 10) {
+                            { Text(book.title.substring(0, 10) + "...") }
+                        } else {
+                            { Text(book.title) }
+                        },
+
+                        text = if (book.description.length > 100) {
+                            { Text(book.description.substring(0, 10) + "...") }
+                        } else {
+                            { Text(book.description) }
+                        },
+                        confirmButton = {
+                            // 何もしない
+                        },
+                        dismissButton = {
+                            Button(onClick = { showDiscribeDialog = false }) {
+                                Text("Back")
+                            }
+                        }
+                    )
+                }
+                if (showDeleteDialog) {
+                    AlertDialog(
+                        title = { Text(text = "Do you really want to delete the book?") },
+                        onDismissRequest = { showDeleteDialog = false },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    showDeleteDialog = false
+                                    onClickDelete(book)
+                                }) {
+                                Text("Delete")
+                            }
+                        },
+                        dismissButton = {
+                            Button(onClick = { showDeleteDialog = false }) {
+                                Text("Back")
+                            }
+                        }
+                    )
                 }
             }
-            // 図鑑説明用ダイアログ表示
-            if (showDiscribeDialog) {
-                AlertDialog(
-                    onDismissRequest = { showDiscribeDialog = false },
-                    title = if (book.title.length > 10) {
-                        { Text(book.title.substring(0, 10) + "...") }
-                    } else {
-                        { Text(book.title) }
-                    },
 
-                    text = if (book.description.length > 100) {
-                        { Text(book.description.substring(0, 10) + "...") }
-                    } else {
-                        { Text(book.description) }
-                    },
-                    confirmButton = {
-                        // 何もしない
-                    },
-                    dismissButton = {
-                        Button(onClick = { showDiscribeDialog = false }) {
-                            Text("戻る")
-                        }
-                    }
-                )
-            }
-            if (showDeleteDialog) {
-                AlertDialog(
-                    title = { Text(text = "本当に図鑑を削除しますか？") },
-                    onDismissRequest = { showDeleteDialog = false },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                showDeleteDialog = false
-                                onClickDelete(book)
-                            }) {
-                            Text("削除する")
-                        }
-                        // TODO 図鑑の画像も削除が必要
-                    },
-                    dismissButton = {
-                        Button(onClick = { showDeleteDialog = false }) {
-                            Text("戻る")
-                        }
-                    }
-                )
-            }
         }
-
     }
 }

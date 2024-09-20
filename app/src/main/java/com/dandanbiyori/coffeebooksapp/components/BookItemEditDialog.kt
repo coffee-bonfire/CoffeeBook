@@ -43,7 +43,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.dandanbiyori.coffeebooksapp.BookItemViewModel
 import com.dandanbiyori.coffeebooksapp.R
-import com.dandanbiyori.coffeebooksapp.components.Util.Companion.saveBookItemImageToInternalStorage
+import com.dandanbiyori.coffeebooksapp.Util
+import com.dandanbiyori.coffeebooksapp.Util.Companion.saveBookItemImageToInternalStorage
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)

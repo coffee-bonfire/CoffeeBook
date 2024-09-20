@@ -1,4 +1,4 @@
-package com.dandanbiyori.coffeebooksapp.components
+package com.dandanbiyori.coffeebooksapp
 
 import android.content.ContentResolver
 import android.content.Context
@@ -91,14 +91,47 @@ class Util {
             return Uri.fromFile(imageFile).toString()
         }
 
+        /**
+         * 画像のパスを受け取り、内部ストレージから画像を削除する
+         *
+         * @param imageString 削除する画像のパス
+         */
         fun deleteImageInternalStorage(imageString: String) {
+            if (imageString.isEmpty()) {
+                return
+            }
+            val context = App.instance.applicationContext
+            val filesDir = context.filesDir.path
+            val bookImageDir = "$filesDir/Books"
+            val bookItemImageDir = "$filesDir/BookItems"
+
             try {
-                val imageFile = File(imageString)
-                if (imageFile.exists()) {
-                    imageFile.delete()
+                val isBookImage = imageString.contains("files/Books")
+                val isBookItemImage = imageString.contains("files/BookItems")
+
+                val imageFileName = imageString.substring(imageString.lastIndexOf("/") + 1)
+
+                if (isBookImage) {
+                    deleteImage(bookImageDir, imageFileName)
                 }
+
+                if (isBookItemImage) {
+                    deleteImage(bookItemImageDir, imageFileName)
+                }
+
             } catch (e: Exception) {
                 e.printStackTrace()
+            }
+        }
+
+        // 画像を削除するメソッド
+        private fun deleteImage(imageDir: String, imageFileName: String) {
+            val imageFile = File(imageDir, imageFileName)
+            if (imageFile.exists()) {
+                Log.d("deleteImageInternalStorage", "delete")
+                imageFile.delete()
+            } else {
+                Log.e("deleteImageInternalStorage", "parentDirName: $imageFileName does not exist")
             }
         }
 

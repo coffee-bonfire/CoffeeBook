@@ -7,9 +7,11 @@ import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,9 +22,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -33,6 +37,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,6 +58,7 @@ import com.dandanbiyori.coffeebooksapp.BookItem
 import com.dandanbiyori.coffeebooksapp.BookItemViewModel
 import com.dandanbiyori.coffeebooksapp.NavigationItem
 import com.dandanbiyori.coffeebooksapp.R
+import com.dandanbiyori.coffeebooksapp.Util
 
 // Book詳細画面（BookItem一覧）
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,6 +70,7 @@ fun BookDetail(
     bookItems : List<BookItem>,
     navController : NavController,
     onClickOpenDialog: () -> Unit,
+    onClickDelete: (BookItem) -> Unit,
     bookItemViewModel: BookItemViewModel = hiltViewModel(),
 ){
     Log.e("BookDetail", "呼び出された")
@@ -115,11 +125,13 @@ fun BookDetail(
                     count = targetBookItems.size,
                     key = {index ->  index},
                     itemContent = { index ->
+                        // BUG デフォルトの画像が表示される事象がある
                         BookDeteilScreen(
                             targetBookItems[index],
                             bookId,
                             navController,
-                            onClickUpdate
+                            onClickUpdate,
+                            onClickDelete
                         )
                     }
                 )
@@ -136,12 +148,16 @@ fun BookDeteilScreen (
     bookId: Int,
     navController: NavController,
     onClickUpdate: (BookItem) -> Unit,
+    onClickDelete: (BookItem) -> Unit,
     bookItemViewModel: BookItemViewModel = hiltViewModel(),
 ){
     Log.e("BookDeteilScreen", "呼び出された")
     var imageBitmap: Bitmap? = null
     val context = LocalContext.current
     val uri: Uri? = bookItem.let { Util.convertStringToUri(it.imageUri) }
+
+    var expanded by remember { mutableStateOf(false) }
+    var selectedOption by remember { mutableStateOf<String?>(null) }
 
     // uriをBitmapに変換
     if (uri != null && uri.toString().isNotEmpty()) {
@@ -178,14 +194,39 @@ fun BookDeteilScreen (
                         .height(dimensionResource(id = R.dimen.book_item_image_height)),
                     contentScale = ContentScale.Crop
                 )
-                IconButton(
-                    onClick = {
-                        // TODO onClickUpdateでダイアログが表示されないため修正が必要
-                        onClickUpdate(bookItem)
-                    },
-                    modifier = Modifier.size(24.dp).align(Alignment.TopEnd),
+                Row( // Use Row for horizontal layout
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    horizontalArrangement = Arrangement.End // Align to the end (right)
                 ) {
-                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Book edit")
+                    IconButton(
+                        onClick = { expanded = true },
+                        modifier = Modifier.size(24.dp) // Maintain size
+                    ) {
+                        Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Book edit")
+                    }
+
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Edit") },
+                            onClick = {
+                                expanded = false
+                                selectedOption = "edit"
+                                onClickUpdate(bookItem)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Delete") },
+                            onClick = {
+                                expanded = false
+                                selectedOption = "delete"
+                                onClickDelete(bookItem)
+                                Log.e("onClickDelete", "呼び出された")
+                            }
+                        )
+                    }
                 }
             }
             Text(

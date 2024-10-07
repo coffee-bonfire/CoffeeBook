@@ -57,7 +57,6 @@ import me.saket.swipe.SwipeableActionsBox
 @Composable
 fun BookRow(
     book: (Book),
-    onCllickRow: (Book) -> Unit,
     onClickUpdate: (Book) -> Unit,
     onClickDelete: (Book) -> Unit,
     navController: NavController,
@@ -87,7 +86,7 @@ fun BookRow(
         icon = {
             Text(
                 modifier = Modifier.padding(start = 20.dp),
-                text = "削除する",
+                text = "Delete",
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
             )

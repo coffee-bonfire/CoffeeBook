@@ -25,7 +25,7 @@ interface BookDao {
 @Dao
 interface BookItemDao {
     @Insert
-    suspend fun insertBookItem(book: BookItem)
+    suspend fun insertBookItem(bookItem: BookItem)
 
     @Query("SELECT * FROM bookItems")
     fun loadAllBookItems(): Flow<List<BookItem>>
@@ -33,9 +33,12 @@ interface BookItemDao {
     @Query("SELECT * FROM bookItems WHERE id = :id")
     fun getBookItem(id:Int): Flow<BookItem>
 
+    @Query("SELECT * FROM bookItems WHERE bookid = :bookId")
+    fun getBookItems(bookId:Int): Flow<List<BookItem>>
+
     @Update
-    suspend fun updateBookItem(book: BookItem)
+    suspend fun updateBookItem(bookItem: BookItem)
 
     @Delete
-    suspend fun deleteBookItem(book: BookItem)
+    suspend fun deleteBookItem(bookItem: BookItem)
 }

@@ -11,10 +11,15 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 object Module {
+
+    // fallbackToDestructiveMigration
+    // https://developer.android.com/training/data-storage/room/migrating-db-versions
     @Provides
     fun provideDatabase(
         @ApplicationContext context: Context
-    ) = Room.databaseBuilder(context,AppDatabase::class.java, "book_database").build()
+    ) = Room.databaseBuilder(context,AppDatabase::class.java, "book_database")
+        .fallbackToDestructiveMigration()
+        .build()
 
     @Provides
     fun provideBookDao(db: AppDatabase) = db.bookDao()

@@ -40,5 +40,15 @@ data class BookItem(
     val bookId: Int, //Booksテーブルへの外部キー
     var title: String,
     var description: String,
-    var imageUri: String
+    var imageUri: String,
+    val type: BooksItemType,
+    var roast:String,
+    var flavor:String,
+    var varieties:String,
+    var country:String,
+    var processing:String,
 )
+enum class BooksItemType {
+    SIMPLE_ITEM,
+    COFFEE_ITEM
+}

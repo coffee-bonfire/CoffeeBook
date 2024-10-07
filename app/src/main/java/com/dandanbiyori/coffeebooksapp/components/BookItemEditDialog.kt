@@ -52,7 +52,7 @@ import java.io.File
 fun BookItemEditDialog(
     context: Context,
     bookIdForDialog:Int,
-    bookItemViewModel: BookItemViewModel = hiltViewModel(),
+    bookItemViewModel: BookItemViewModel
 ) {
     Log.e("BookItemEditDialog", "呼び出された")
     // EditDialogが非表示になるタイミングで実行される

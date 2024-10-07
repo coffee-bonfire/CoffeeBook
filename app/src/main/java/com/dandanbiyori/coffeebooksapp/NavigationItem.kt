@@ -9,4 +9,6 @@ sealed class NavigationItem(var route: String, val icon: ImageVector?, var title
     object Home : NavigationItem("Home", Icons.Default.Home, "Home")
     object Setting : NavigationItem("History", Icons.Default.Settings, "Setting")
     object Book : NavigationItem("Book", Icons.Default.Home, "Book")
+    object CoffeeBookEdit : NavigationItem("CoffeeBookEdit", Icons.Default.Home, "CoffeeBookEdit")
+
 }

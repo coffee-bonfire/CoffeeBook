@@ -4,11 +4,12 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -86,12 +87,25 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
     var isShowDialog by mutableStateOf(false)
     private var editingBookItem: BookItem? = null
 
-    var bookItem = MutableLiveData<BookItem>()
+    // 変更後
+    private val _bookItem = MutableStateFlow<BookItem?>(null)
+    val bookItem = _bookItem.asStateFlow()
 
     // distinctUntilChanged:値が同じ場合は無視する
     val bookItems = bookItemDao.loadAllBookItems().distinctUntilChanged()
+
+    private val _bookItemsByBookId = MutableStateFlow<List<BookItem>>(emptyList())
+    var bookItemsByBookId = _bookItemsByBookId.asStateFlow()
+
     val isEditing: Boolean
         get() = editingBookItem != null
+
+    // Coffeeitem
+    var roast by mutableStateOf("")
+    var flavor by mutableStateOf("")
+    var varieties by mutableStateOf("")
+    var country by mutableStateOf("")
+    var processing by mutableStateOf("")
 
 
     fun createBookItem(bookId: Int) {
@@ -101,6 +115,32 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
                 bookId = bookId,
                 description = description,
                 imageUri = bookItemImageUri,
+                type = BooksItemType.SIMPLE_ITEM,
+                roast = roast,
+                flavor = flavor,
+                varieties = varieties,
+                country = country,
+                processing = processing
+            )
+            bookItemDao.insertBookItem(newBookItem)
+        }
+    }
+
+
+    fun createCoffeeBookItem(bookId: Int) {
+        Log.e("createCoffeeBookItem","CoffeeBookItemが作成されました。")
+        viewModelScope.launch {
+            val newBookItem = BookItem(
+                title = title,
+                bookId = bookId,
+                description = description,
+                imageUri = bookItemImageUri,
+                type = BooksItemType.COFFEE_ITEM,
+                roast = roast,
+                flavor = flavor,
+                varieties = varieties,
+                country = country,
+                processing = processing
             )
             bookItemDao.insertBookItem(newBookItem)
         }
@@ -112,6 +152,19 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
         description = bookItem.description
         bookItemImageUri = bookItem.imageUri
         Log.e("setEditingBookItem","BookItemがセットされました。")
+    }
+
+    fun setEditingCoffeeBookItem(bookItem: BookItem) {
+        Log.e("setEditingCoffeeBookItem","CoffeeBookItemがセットされました。")
+        editingBookItem = bookItem
+        title = bookItem.title
+        description = bookItem.description
+        bookItemImageUri = bookItem.imageUri
+        roast = bookItem.roast
+        flavor = bookItem.flavor
+        varieties = bookItem.varieties
+        country = bookItem.country
+        processing = bookItem.processing
     }
 
     fun deleteBookItem(bookItem: BookItem) {
@@ -131,6 +184,20 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
         }
     }
 
+    fun updateCoffeeBookItem() {
+        editingBookItem?.let { bookItem ->
+            viewModelScope.launch {
+                bookItem.title = title
+                bookItem.country = country
+                bookItem.flavor = flavor
+                bookItem.processing = processing
+                bookItem.roast = roast
+                bookItem.varieties = varieties
+                bookItemDao.updateBookItem(bookItem)
+            }
+        }
+    }
+
     fun resetProperties() {
         editingBookItem = null
         title = ""
@@ -139,20 +206,28 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
     }
 
     // BookItemをセットする
+    // 変更後
     fun setBookItem(id: Int) {
-
-        // viewModelScope内でコルーチンを起動
         viewModelScope.launch {
-            // DaoからFlowを取得し、最初の要素を収集
             bookItemDao.getBookItem(id).collect {
-                // 収集したデータをLiveDataにポスト
-                bookItem.postValue(it)
+                _bookItem.value = it
             }
         }
     }
 
+
     // BookItemをリセットする
     fun resetBookItem() {
-        bookItem.value = null
+        _bookItem.value = null
+    }
+
+    fun setBookItemsByBookId(bookId: Int){
+        viewModelScope.launch {
+            bookItemDao.getBookItems(bookId).collect {
+                Log.e("getBookItemsByBookId","BookItemが取得されました。")
+                Log.e("getBookItemsByBookId",it.toString())
+                _bookItemsByBookId.value = it
+            }
+        }
     }
 }

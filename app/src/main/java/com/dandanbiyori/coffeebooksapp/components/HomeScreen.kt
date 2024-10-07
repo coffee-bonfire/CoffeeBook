@@ -140,9 +140,6 @@ fun HomeScreen(
                             // Our page content
                             CoffeeBookList(
                                 books = books,
-                                onClickRow = {
-
-                                },
                                 onClickUpdate = {
                                     bookViewModel.setEditingBook(it)
                                     bookViewModel.isShowDialog = true
@@ -159,9 +156,6 @@ fun HomeScreen(
                             // Our page content
                             UserBookList(
                                 books = books,
-                                onClickRow = {
-
-                                },
                                 onClickUpdate = {
                                     bookViewModel.setEditingBook(it)
                                     bookViewModel.isShowDialog = true
@@ -187,6 +181,6 @@ enum class CoffeeBooksPage(
     @StringRes val titleResId: Int,
     @DrawableRes val drawableResId: Int
 ) {
-    COFFEE_BOOKS(R.string.tab_coffee_books, R.drawable.ic_action_swipe_coffee_bean),
-    USER_BOOKS(R.string.tab_my_books, R.drawable.ic_action_swipe_user_book)
+    USER_BOOKS(R.string.tab_my_books, R.drawable.ic_action_swipe_user_book),
+    COFFEE_BOOKS(R.string.tab_coffee_books, R.drawable.ic_action_swipe_coffee_bean)
 }

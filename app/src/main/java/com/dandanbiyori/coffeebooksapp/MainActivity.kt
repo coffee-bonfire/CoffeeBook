@@ -28,6 +28,7 @@ import com.dandanbiyori.coffeebooksapp.components.BookDetail
 import com.dandanbiyori.coffeebooksapp.components.BookEditDialog
 import com.dandanbiyori.coffeebooksapp.components.BookItemDetailView
 import com.dandanbiyori.coffeebooksapp.components.BookItemEditDialog
+import com.dandanbiyori.coffeebooksapp.components.CoffeeItemEdit
 import com.dandanbiyori.coffeebooksapp.components.HomeScreen
 import com.dandanbiyori.coffeebooksapp.components.NoBookItemDetailView
 import com.dandanbiyori.coffeebooksapp.components.SettingComponent
@@ -65,7 +66,7 @@ fun MainContent(
     Log.e("MainContent", "呼び出された")
     val context = LocalContext.current
     var bookIdForDialog by remember { mutableStateOf(0) }
-
+    val bookItem by bookItemViewModel.bookItem.collectAsState()
 
     if (bookViewModel.isShowDialog) {
         BookEditDialog(context)
@@ -73,12 +74,11 @@ fun MainContent(
     if (bookItemViewModel.isShowDialog) {
         BookItemEditDialog(
             context,
-            bookIdForDialog
+            bookIdForDialog,
+            bookItemViewModel
         )
     }
-    var showFab by remember { mutableStateOf(true) }
     val books by bookViewModel.books.collectAsState(initial = emptyList())
-    val bookItems by bookItemViewModel.bookItems.collectAsState(initial = emptyList())
 
     NavHost(
         navController,
@@ -107,19 +107,29 @@ fun MainContent(
                 bookId = backStackEntry.arguments?.getInt("BookId") ?: 0,
                 onClickBack = { navController.navigateUp() },
                 onClickUpdate = {
-                    bookItemViewModel.isShowDialog = true
-                    bookItemViewModel.setEditingBookItem(it)
+                    // 図鑑アイテム編集画面に遷移
+                    if (it.type == BooksItemType.SIMPLE_ITEM) {
+                        bookItemViewModel.isShowDialog = true
+                        bookItemViewModel.setEditingBookItem(it)
+                    }
+                    if (it.type == BooksItemType.COFFEE_ITEM) {
+                        // 現状、Updateではなく新規作成されてしまう　要修正　TODO
+                        bookItemViewModel.setEditingCoffeeBookItem(it)
+                        navController.navigate(NavigationItem.CoffeeBookEdit.route)
+                    }
                 },
-                bookItems = bookItems,
                 onClickOpenDialog = {
                     bookItemViewModel.isShowDialog = true
                 },
                 navController = navController,
                 onClickDelete = {
+                    Log.e("MainContent", "削除ボタンが押されました")
                     bookItemViewModel.deleteBookItem(it)
                     deleteImageInternalStorage(it.imageUri)
-                }
+                },
+                bookItemViewModel = bookItemViewModel
             )
+            Log.e("MainContent", "BookId: ${backStackEntry.arguments?.getInt("BookId")}")
             bookIdForDialog = backStackEntry.arguments?.getInt("BookId")!!
         }
 
@@ -140,8 +150,8 @@ fun MainContent(
             val bookItemId = backStackEntry.arguments?.getInt("BookItemId") ?: 0
             bookItemViewModel.setBookItem(bookItemId)
 
-            if (bookItemViewModel.bookItem.value != null) {
-                bookItemViewModel.setEditingBookItem(bookItemViewModel.bookItem.value!!)
+            if (bookItem != null) {
+                bookItemViewModel.setEditingBookItem(bookItem!!)
                 BookItemDetailView(
                     onClickBack = {
                         navController.navigateUp()
@@ -150,11 +160,23 @@ fun MainContent(
                     onClickEdit = {
                         bookItemViewModel.setEditingBookItem(it)
                     },
-                    bookItem = bookItemViewModel.bookItem.value!!,
+                    bookItem = bookItem!!,
                     bookItemViewModel
                 )
             }
             bookIdForDialog = backStackEntry.arguments?.getInt("BookItemId")!!
+        }
+
+        // Setting画面
+        composable(NavigationItem.CoffeeBookEdit.route) {
+            CoffeeItemEdit(
+                onClickBack = {
+                    navController.navigateUp()
+                },
+                bookIdForDialog,
+                navController,
+                bookItemViewModel
+            )
         }
     }
 

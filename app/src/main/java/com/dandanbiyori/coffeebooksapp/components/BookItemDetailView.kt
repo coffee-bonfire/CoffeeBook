@@ -6,7 +6,6 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -31,8 +29,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
+import androidx.compose.material3.TextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,6 +51,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.dandanbiyori.coffeebooksapp.BookItem
 import com.dandanbiyori.coffeebooksapp.BookItemViewModel
+import com.dandanbiyori.coffeebooksapp.BooksItemType
 import com.dandanbiyori.coffeebooksapp.R
 import com.dandanbiyori.coffeebooksapp.Util
 
@@ -65,14 +63,11 @@ fun BookItemDetailView(
     bookItemViewModel: BookItemViewModel
 ) {
     Log.e("BookItemDetailView", "呼び出された")
-
-    val scrollState = rememberScrollState()
     Box(
         modifier = Modifier.fillMaxSize()
-    ){
+    ) {
         BookItemDetailContent(
             bookItem,
-            scrollState,
             onClickEdit,
             bookItemViewModel
         )
@@ -123,11 +118,11 @@ fun BookItemDetailTopBar(
 @Composable
 fun BookItemDetailContent(
     bookItem: BookItem,
-    scrollState: ScrollState,
-    onClickEdit:(BookItem) -> Unit,
+    onClickEdit: (BookItem) -> Unit,
     bookItemViewModel: BookItemViewModel
 ) {
     Log.e("BookItemDetailContent", "呼び出された")
+    val scrollState = rememberScrollState()
 
     var text by remember { mutableStateOf("") }
     val maxChars = 200
@@ -135,7 +130,9 @@ fun BookItemDetailContent(
     val fontFamily = FontFamily.Monospace
     text = bookItem.description
 
-    Column(Modifier.verticalScroll(scrollState)) {
+    Column(
+        Modifier.verticalScroll(scrollState)
+    ) {
         ConstraintLayout {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -144,94 +141,153 @@ fun BookItemDetailContent(
                 BookItemImage(bookItem)
                 // title
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    // 10文字を超過したら省略
-                    text = if (bookItem.title.length > 10){
-                        bookItem.title.substring(0, 10) + "..."
-                    } else {
-                        bookItem.title
-                    },
-                    color = Color.Gray,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    modifier = Modifier.padding(20.dp, 0.dp)
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Column(
-                    horizontalAlignment = Alignment.Start,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp, 0.dp),
-                ) {
-                    if (!switchInputFlag.value) {
-                        Log.e("text.description", "呼び出された")
+                if (bookItem.type == BooksItemType.COFFEE_ITEM) {
+                    Log.e("BookItemDetailContent_Column", "呼び出された")
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp),
+                    ) {
                         Text(
-                            text = bookItem.description,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(300.dp),// 高さを指定
-                            maxLines = 10 // 最大行数を指定
+                            text = bookItemViewModel.title,
+                            modifier = Modifier.fillMaxWidth()
                         )
-                    } else {
-                        Log.e("OutlinedTextField.description", "呼び出された")
-                        OutlinedTextField(
-                            value = text,
-                            onValueChange = {
-                                // 200文字を超えないようにする
-                                if (it.length <= maxChars){
-                                    text = it
-                                    bookItemViewModel.description = it
-                                }
-                            },
-                            label = { Text("図鑑の説明") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(300.dp), // 高さを指定
-                            maxLines = 10, // 最大行数を指定
-                            textStyle = androidx.compose.ui.text.TextStyle(
-                                fontSize = 20.sp,fontFamily = fontFamily
-                            )
-                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         Text(
-                            text = "${text.length}/$maxChars",
-                            color = if(text.length == maxChars) Color.Red else Color.Gray,
-                            modifier = Modifier.align(Alignment.End)
+                            text = bookItemViewModel.country,
+                            modifier = Modifier.fillMaxWidth()
                         )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = bookItemViewModel.varieties,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = bookItemViewModel.processing,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = bookItemViewModel.flavor,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = bookItemViewModel.roast,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
 
-                    Row {
-                        Spacer(modifier = Modifier.weight(1f)) // 空白を挿入
-                        if (!switchInputFlag.value) {
-                            Button(
-                                onClick = {
-                                    Log.e("Button.book", bookItem.title)
-                                    switchInputFlag.value = true
-                                    onClickEdit(bookItem)
-                                },
-                            ) {
-                                Text("編集")
-                            }
+
+                } else {
+                    Text(
+                        // 10文字を超過したら省略
+                        text = if (bookItem.title.length > 10) {
+                            bookItem.title.substring(0, 10) + "..."
                         } else {
-                            Button(
-                                onClick = {
-                                    // ユーザ入力値でDB更新
-                                    bookItemViewModel.updateBookItem()
-                                    text = bookItem.description
-                                    switchInputFlag.value = false
+                            bookItem.title
+                        },
+                        color = Color.Gray,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.padding(20.dp, 0.dp)
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Column(
+                        horizontalAlignment = Alignment.Start,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp, 0.dp),
+                    ) {
+                        if (!switchInputFlag.value) {
+                            Log.e("text.description", "呼び出された")
+                            Text(
+                                text = bookItem.description,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(300.dp),// 高さを指定
+                                maxLines = 10 // 最大行数を指定
+                            )
+                        } else {
+                            Log.e("TextField.description", "呼び出された")
+                            TextField(
+                                value = text,
+                                onValueChange = {
+                                    // 200文字を超えないようにする
+                                    if (it.length <= maxChars) {
+                                        text = it
+                                        bookItemViewModel.description = it
+                                    }
                                 },
+                                label = { Text("Description for Item") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(300.dp), // 高さを指定
+                                maxLines = 10, // 最大行数を指定
+                                textStyle = androidx.compose.ui.text.TextStyle(
+                                    fontSize = 20.sp, fontFamily = fontFamily
+                                )
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween, // 左寄せと右寄せにする
+                                verticalAlignment = Alignment.CenterVertically // 垂直方向中央揃え
                             ) {
-                                Text("保存")
+                                // 左側に追加したいテキスト
+                                Text(
+                                    text = if (text.length > maxChars * 0.9) "Plese enter 200 characters or less." else "",
+                                    color = Color.Red // 必要に応じて色を設定
+                                )
+
+                                // 元のテキスト（右寄せ）
+                                Text(
+                                    text = "${text.length}/$maxChars",
+                                    color = if (text.length == maxChars) Color.Red else Color.Gray,
+                                    modifier = if (text.length > maxChars * 0.9) Modifier else Modifier.weight(
+                                        1f
+                                    )
+                                )
                             }
-                            Button(
-                                onClick = {
-                                    switchInputFlag.value = false
-                                    text = bookItem.description
-                                },
-                            ) {
-                                Text("戻る")
+                        }
+
+                        Row {
+                            Spacer(modifier = Modifier.weight(1f)) // 空白を挿入
+                            if (!switchInputFlag.value) {
+                                Button(
+                                    onClick = {
+                                        Log.e("Button.book", bookItem.title)
+                                        switchInputFlag.value = true
+                                        onClickEdit(bookItem)
+                                    },
+                                ) {
+                                    Text("Edit")
+                                }
+                            } else {
+                                Button(
+                                    onClick = {
+                                        // ユーザ入力値でDB更新
+                                        bookItemViewModel.updateBookItem()
+                                        text = bookItem.description
+                                        switchInputFlag.value = false
+                                    },
+                                ) {
+                                    Text("Save")
+                                }
+                                Button(
+                                    onClick = {
+                                        switchInputFlag.value = false
+                                        text = bookItem.description
+                                    },
+                                ) {
+                                    Text("Back")
+                                }
                             }
+
                         }
 
                     }

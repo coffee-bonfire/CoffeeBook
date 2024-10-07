@@ -13,7 +13,6 @@ import com.dandanbiyori.coffeebooksapp.BooksType
 @Composable
 fun UserBookList(
     books: List<Book>,
-    onClickRow: (Book) -> Unit,
     onClickUpdate: (Book) -> Unit,
     onClickDelete: (Book) -> Unit,
     navController: NavController
@@ -21,11 +20,14 @@ fun UserBookList(
     LazyColumn(
         modifier = Modifier.padding(10.dp)
     ) {
-        items(books) { book ->
+        items(
+            books,
+            // keyを指定することで、更新された項目のみ更新される
+            key = { book -> book.id }
+        ) { book ->
             if (book.type == BooksType.USER_CREATED) {
                 BookRow(
                     book = book,
-                    onCllickRow = onClickRow,
                     onClickUpdate = onClickUpdate,
                     onClickDelete = onClickDelete,
                     navController

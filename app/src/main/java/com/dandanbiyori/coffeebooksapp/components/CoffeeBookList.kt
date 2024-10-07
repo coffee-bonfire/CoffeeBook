@@ -10,19 +10,22 @@ import com.dandanbiyori.coffeebooksapp.BooksType
 @Composable
 fun CoffeeBookList(
     books: List<Book>,
-    onClickRow: (Book) -> Unit,
     onClickUpdate: (Book) -> Unit,
     onClickDelete: (Book) -> Unit,
     navController: NavController
 ){
     // SystemBooks
-    // TODO スクロール可能にする
     LazyColumn {
-        items(books) { book ->
+        items(
+            books,
+            // keyを指定することで、更新時にのみ更新される
+            key = {
+                book -> book.id
+            }
+        ) { book ->
             if( book.type == BooksType.SYSTEM_PROVIDED ){
                 BookRow(
                     book = book,
-                    onCllickRow = onClickRow,
                     onClickUpdate = onClickUpdate,
                     onClickDelete = onClickDelete,
                     navController

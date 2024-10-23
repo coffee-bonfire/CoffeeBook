@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.dandanbiyori.coffeebooksapp.NavigationItem
 import com.dandanbiyori.coffeebooksapp.R
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 
@@ -110,7 +111,7 @@ fun SettingComponent(
                 }
                 Column(
                     modifier = Modifier.clickable {
-                        // todo クリック時にヘルプ画面を表示する
+                        navController.navigate(NavigationItem.PrivacyPolicy.route)
                     }
                 ) {
                     Row(
@@ -119,7 +120,7 @@ fun SettingComponent(
                             .padding(horizontal = 20.dp, vertical = 20.dp)
                     ) {
                         Text(
-                            text = "Help",
+                            text = "Privacy Policy",
                             fontSize = 20.sp,
                             textAlign = TextAlign.Left,
                         )

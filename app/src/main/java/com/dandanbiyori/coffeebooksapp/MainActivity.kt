@@ -30,7 +30,7 @@ import com.dandanbiyori.coffeebooksapp.components.BookItemDetailView
 import com.dandanbiyori.coffeebooksapp.components.BookItemEditDialog
 import com.dandanbiyori.coffeebooksapp.components.CoffeeItemEdit
 import com.dandanbiyori.coffeebooksapp.components.HomeScreen
-import com.dandanbiyori.coffeebooksapp.components.NoBookItemDetailView
+import com.dandanbiyori.coffeebooksapp.components.PrivacyPolicyView
 import com.dandanbiyori.coffeebooksapp.components.SettingComponent
 import com.dandanbiyori.coffeebooksapp.ui.theme.CoffeeBooksAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -69,7 +69,10 @@ fun MainContent(
     val bookItem by bookItemViewModel.bookItem.collectAsState()
 
     if (bookViewModel.isShowDialog) {
-        BookEditDialog(context)
+        BookEditDialog(
+            context,
+            bookViewModel
+        )
     }
     if (bookItemViewModel.isShowDialog) {
         BookItemEditDialog(
@@ -113,7 +116,6 @@ fun MainContent(
                         bookItemViewModel.setEditingBookItem(it)
                     }
                     if (it.type == BooksItemType.COFFEE_ITEM) {
-                        // 現状、Updateではなく新規作成されてしまう　要修正　TODO
                         bookItemViewModel.setEditingCoffeeBookItem(it)
                         navController.navigate(NavigationItem.CoffeeBookEdit.route)
                     }
@@ -160,8 +162,17 @@ fun MainContent(
                     onClickEdit = {
                         bookItemViewModel.setEditingBookItem(it)
                     },
+                    onClickUpdate = {
+                        if (it.type == BooksItemType.SIMPLE_ITEM) {
+                            bookItemViewModel.isShowDialog = true
+                        }
+                        if (it.type == BooksItemType.COFFEE_ITEM) {
+                            bookItemViewModel.setEditingCoffeeBookItem(it)
+                            navController.navigate(NavigationItem.CoffeeBookEdit.route)
+                        }
+                    },
                     bookItem = bookItem!!,
-                    bookItemViewModel
+                    bookItemViewModel,
                 )
             }
             bookIdForDialog = backStackEntry.arguments?.getInt("BookItemId")!!
@@ -175,10 +186,16 @@ fun MainContent(
                 },
                 bookIdForDialog,
                 navController,
-                bookItemViewModel
+                bookItemViewModel,
+                context
+            )
+        }
+        composable(NavigationItem.PrivacyPolicy.route) {
+            PrivacyPolicyView(
+                onClickBack = {
+                    navController.navigateUp()
+                },
             )
         }
     }
-
-
 }

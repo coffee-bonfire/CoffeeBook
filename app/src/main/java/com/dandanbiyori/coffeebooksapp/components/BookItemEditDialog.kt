@@ -159,6 +159,7 @@ fun LoadItemImage(onImageLoaded: (Uri) -> Unit, bookImageUriString: String) {
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            Log.e("uri_LoadItemImage", uri.toString())
             selectedImageUri = uri
             // URIが変更されたときにコールバックを呼び出し
             uri?.let {

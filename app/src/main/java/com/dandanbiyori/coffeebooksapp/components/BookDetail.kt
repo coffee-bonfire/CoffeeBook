@@ -310,7 +310,6 @@ fun BookDeteilScreen(
                         )
                         DropdownMenuItem(
                             text = { Text("Delete") },
-                            // 削除されないことがあるため用修正　TODO
                             onClick = {
                                 expanded = false
                                 selectedOption = "delete"

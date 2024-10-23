@@ -2,6 +2,7 @@ package com.dandanbiyori.coffeebooksapp.components
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -51,7 +52,7 @@ import java.io.File
 @Composable
 fun BookEditDialog(
     context: Context,
-    bookViewModel: BookViewModel = hiltViewModel(),
+    bookViewModel: BookViewModel,
 ) {
     // EditDialogが非表示になるタイミングで実行される
     // 保持しているviewModelの値をクリアする
@@ -155,6 +156,7 @@ fun LoadImage(onImageLoaded: (Uri) -> Unit, bookImageUriString: String) {
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             selectedImageUri = uri
+            Log.e("uri", uri.toString())
             // URIが変更されたときにコールバックを呼び出し
             uri?.let {
                 onImageLoaded(it)
@@ -175,6 +177,7 @@ fun LoadImage(onImageLoaded: (Uri) -> Unit, bookImageUriString: String) {
                 )
             }
             Spacer(modifier = Modifier.width(10.dp))
+            // TODO 画像削除処理の追加が必要。現在更新のみ
             if (selectedImageUri != null) {
                 Button(
                     onClick = {

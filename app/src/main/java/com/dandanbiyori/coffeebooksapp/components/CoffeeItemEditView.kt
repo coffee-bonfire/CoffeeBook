@@ -1,57 +1,72 @@
 package com.dandanbiyori.coffeebooksapp.components
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.dandanbiyori.coffeebooksapp.BookItemViewModel
-import com.dandanbiyori.coffeebooksapp.NavigationItem
 import com.dandanbiyori.coffeebooksapp.R
+import com.dandanbiyori.coffeebooksapp.Util
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CoffeeItemEdit(
     onClickBack: () -> Unit,
-    bookIdForDialog:Int,
+    bookIdForDialog: Int,
     navController: NavController,
     bookItemViewModel: BookItemViewModel,
+    context: Context
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val maxTitleLength = 20
@@ -60,6 +75,8 @@ fun CoffeeItemEdit(
     val maxProcessingLength = 20
     val maxFlavorLength = 30
     val maxRoastLength = 15
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var isImageFlag by remember { mutableStateOf(false) }
 
     // バックボタンが押されたときの処理
     BackHandler {
@@ -72,19 +89,11 @@ fun CoffeeItemEdit(
             bookItemViewModel.resetProperties()
         }
     }
-    Log.e("bookIdForDialog：", "：$bookIdForDialog")
-    Log.e("title：", "：${bookItemViewModel.title}")
-    Log.e("country：", "：${bookItemViewModel.country}")
-    Log.e("varieties：", "：${bookItemViewModel.varieties}")
-    Log.e("processing：", "：${bookItemViewModel.processing}")
-    Log.e("flavor：", "：${bookItemViewModel.flavor}")
-    Log.e("roast：", "：${bookItemViewModel.roast}")
-
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    if(bookItemViewModel.isEditing) Text("Edit Item") else Text("Create Item")
+                    if (bookItemViewModel.isEditing) Text("Edit Item") else Text("Create Item")
                 },
                 navigationIcon = {
                     IconButton(
@@ -102,6 +111,7 @@ fun CoffeeItemEdit(
             )
         }
     ) { padding ->
+        val scrollState = rememberScrollState()
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
@@ -111,7 +121,7 @@ fun CoffeeItemEdit(
                     Button(
                         onClick = {
                             showDialog = false
-                            navController.navigate("${NavigationItem.Home.route}/${bookIdForDialog}")
+                            onClickBack()
                             bookItemViewModel.resetProperties()
                         },
                     ) {
@@ -133,27 +143,31 @@ fun CoffeeItemEdit(
         Column(
             modifier = Modifier
                 .padding(padding)
-                .fillMaxWidth() // Column の幅を最大化
+                .fillMaxWidth()
+                .verticalScroll(scrollState)
+            // Column の幅を最大化
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_action_swipe_coffee_bean),
-                contentDescription = "none",
-                Modifier
-                    .fillMaxWidth()
-                    .height(300.dp),
-                contentScale = ContentScale.Crop,
+            LoadCoffeeItemImage(
+                { imageUri ->
+                    selectedImageUri = imageUri
+                },
+                bookItemViewModel.bookItemImageUri,
+                bookItemViewModel
             )
+
             Card(
-                onClick = { /*TODO*/ },
+                onClick = {},
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
+                    .fillMaxWidth(),
                 shape = RoundedCornerShape(0.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White,
+                ),
             ) {
                 Column(
                     modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp),
+                        .padding(16.dp)
+                        .imePadding(),
                 ) {
                     // 各項目を OutlinedTextField でラップし、ラベルを追加
                     OutlinedTextField(
@@ -230,19 +244,38 @@ fun CoffeeItemEdit(
             Spacer(modifier = Modifier.height(16.dp)) // Card と Button の間にスペースを追加
 
             Button(
+                // TODO 画像が保存されてない。
                 onClick = {
                     // 編集中の場合は更新、それ以外の場合は新規作成
                     if (bookItemViewModel.isEditing) {
+                        selectedImageUri?.let { newUri ->
+                            val oldBookUri: Uri? =
+                                Util.convertStringToUri(bookItemViewModel.bookItemImageUri)
+                            val file = File(oldBookUri?.path ?: "")
+                            if (file.exists()) {
+                                file.delete()
+                            }
+                            val savedImageUri =
+                                Util.saveBookItemImageToInternalStorage(newUri, context)
+                            bookItemViewModel.bookItemImageUri = savedImageUri
+                        }
                         bookItemViewModel.updateCoffeeBookItem()
                     } else {
+                        // 画像を選択している場合は画像を保存
+                        selectedImageUri?.let { uri ->
+                            // 選択された画像を内部ストレージに保存し、URIをViewModelに設定
+                            val savedImageUri =
+                                Util.saveBookItemImageToInternalStorage(uri, context)
+                            bookItemViewModel.bookItemImageUri = savedImageUri
+                        }
                         bookItemViewModel.createCoffeeBookItem(bookIdForDialog)
-
                     }
-                    navController.navigate("${NavigationItem.Home.route}/${bookIdForDialog}")
+                    onClickBack()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .imePadding(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFD3A780),
                     contentColor = Color.White
@@ -258,4 +291,102 @@ fun CoffeeItemEdit(
 
 
     }
+}
+
+// TODO 画像のアップロード機能追加
+@Composable
+fun LoadCoffeeItemImage(
+    onImageLoaded: (Uri) -> Unit,
+    bookImageUriString: String,
+    bookItemViewModel: BookItemViewModel
+) {
+    // ViewModel の状態を使用
+    val imageUri by bookItemViewModel.imageUri
+    val isUpdating by bookItemViewModel.isUpdating
+
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            Log.e("ImagePicker", "Selected image URI: $uri")
+            bookItemViewModel.updateImage(uri)
+            // URIが変更されたときにコールバックを呼び出し
+            uri?.let {
+                onImageLoaded(it)
+            }
+        }
+    val iconModifier = Modifier
+        .size(Dimens.ToolbarIconSize)
+        .background(
+            color = MaterialTheme.colorScheme.surface,
+            shape = CircleShape
+        )
+        .clip(CircleShape)
+
+    if (bookImageUriString != "") {
+        val bookImageUri = Uri.parse(bookImageUriString)
+        bookItemViewModel.setImageUri(bookImageUri)
+    }
+
+    // 画像が選択されていなければ空のBoxを表示
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp) // 画像の想定サイズ
+                .background(Color.LightGray)
+        ) {
+            if (isUpdating) {
+                // 更新中はプログレスバーを表示
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else if (imageUri != Uri.EMPTY && imageUri != null) {
+                Log.e("ImagePicker", "Selected image URI: $imageUri")
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        model = imageUri
+                    ),
+                    contentDescription = stringResource(R.string.dialog_user_select_image),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentScale = ContentScale.Crop
+                )
+
+                // 選択した画像が存在する場合は画像更新用ボタンを表示
+                // 画像更新ボタン
+                IconButton(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(end = Dimens.ToolbarIconPadding)
+                        .then(iconModifier)
+                        .size(50.dp)
+                        .background(Color.White.copy(alpha = 0.5f), CircleShape),
+                    onClick = {
+                        bookItemViewModel.startUpdating()
+                        launcher.launch("image/*")
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "図鑑画像更新"
+                    )
+                }
+            } else {
+                Log.e("else", "empty")
+                Log.e("else2", imageUri.toString())
+                Log.e("else3", bookImageUriString)
+                // 画像が選択されていない場合は空のBoxを表示
+                // bookImageUriString の画像を表示
+                // bookImageUriをUriに変換
+                IconButton(
+                    onClick = {
+                        bookItemViewModel.startUpdating()
+                        launcher.launch("image/*")
+                    },
+                    modifier = Modifier.align(Alignment.Center)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "図鑑画像追加"
+                    )
+                }
+            }
+        }
 }

@@ -1,6 +1,8 @@
 package com.dandanbiyori.coffeebooksapp
 
+import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -107,6 +109,27 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
     var country by mutableStateOf("")
     var processing by mutableStateOf("")
 
+    private val _imageUri = mutableStateOf<Uri?>(null)
+    val imageUri: State<Uri?> = _imageUri
+    private val _isUpdating = mutableStateOf(false)
+    val isUpdating: State<Boolean> = _isUpdating
+
+    fun setImageUri(uri: Uri?) {
+        _imageUri.value = uri
+    }
+
+    fun updateImage(uri: Uri?) {
+        _imageUri.value = uri
+        finishUpdating()
+    }
+    fun startUpdating() {
+        _isUpdating.value = true
+    }
+
+    fun finishUpdating() {
+        _isUpdating.value = false
+    }
+
 
     fun createBookItem(bookId: Int) {
         viewModelScope.launch {
@@ -203,6 +226,12 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
         title = ""
         description = ""
         bookItemImageUri = ""
+        roast = ""
+        flavor = ""
+        varieties = ""
+        country = ""
+        processing = ""
+        _imageUri.value = null
     }
 
     // BookItemをセットする

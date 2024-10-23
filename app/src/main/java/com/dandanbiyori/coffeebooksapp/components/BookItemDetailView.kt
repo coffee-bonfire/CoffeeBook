@@ -5,8 +5,10 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -59,6 +62,7 @@ import com.dandanbiyori.coffeebooksapp.Util
 fun BookItemDetailView(
     onClickBack: () -> Unit,
     onClickEdit: (BookItem) -> Unit,
+    onClickUpdate : (BookItem) -> Unit,
     bookItem: BookItem,
     bookItemViewModel: BookItemViewModel
 ) {
@@ -69,10 +73,12 @@ fun BookItemDetailView(
         BookItemDetailContent(
             bookItem,
             onClickEdit,
-            bookItemViewModel
+            bookItemViewModel,
         )
         BookItemDetailTopBar(
             onClickBack,
+            onClickUpdate,
+            bookItem
         )
     }
 
@@ -81,6 +87,8 @@ fun BookItemDetailView(
 @Composable
 fun BookItemDetailTopBar(
     onClickBack: () -> Unit,
+    onClickUpdate: (BookItem) -> Unit,
+    bookItem: BookItem
 ) {
     Row(
         modifier = Modifier
@@ -111,10 +119,26 @@ fun BookItemDetailTopBar(
                 tint = MaterialTheme.colorScheme.onSurface
             )
         }
+
+        IconButton(
+            onClick = {
+                onClickUpdate(bookItem)
+            },
+            modifier = Modifier
+                .padding(end = Dimens.ToolbarIconPadding)
+                .then(iconModifier)
+        ) {
+            Icon(
+                Icons.Filled.Edit,
+                contentDescription = "Icon",
+                tint = MaterialTheme.colorScheme.onSurface
+            )
+        }
+
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun BookItemDetailContent(
     bookItem: BookItem,
@@ -130,12 +154,22 @@ fun BookItemDetailContent(
     val fontFamily = FontFamily.Monospace
     text = bookItem.description
 
+    // 画像をタップで画像を最大表示できないか。
+
     Column(
         Modifier.verticalScroll(scrollState)
     ) {
         ConstraintLayout {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.combinedClickable(
+                    onClick = {},
+                    onLongClick = {
+                        if (bookItem.type == BooksItemType.SIMPLE_ITEM){
+                            switchInputFlag.value = true
+                            onClickEdit(bookItem)
+                        }
+                    })
             ) {
                 // image
                 BookItemImage(bookItem)
@@ -193,7 +227,7 @@ fun BookItemDetailContent(
                         color = Color.Gray,
                         fontSize = 30.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        modifier = Modifier.padding(20.dp, 0.dp)
+                        modifier = Modifier.padding(20.dp, 0.dp),
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Column(
@@ -270,21 +304,22 @@ fun BookItemDetailContent(
                             } else {
                                 Button(
                                     onClick = {
-                                        // ユーザ入力値でDB更新
-                                        bookItemViewModel.updateBookItem()
-                                        text = bookItem.description
-                                        switchInputFlag.value = false
-                                    },
-                                ) {
-                                    Text("Save")
-                                }
-                                Button(
-                                    onClick = {
                                         switchInputFlag.value = false
                                         text = bookItem.description
                                     },
                                 ) {
                                     Text("Back")
+                                }
+                                Button(
+                                    onClick = {
+                                        // ユーザ入力値でDB更新
+                                        bookItemViewModel.updateBookItem()
+                                        text = bookItem.description
+                                        switchInputFlag.value = false
+                                        bookItemViewModel.resetProperties()
+                                    },
+                                ) {
+                                    Text("Save")
                                 }
                             }
 

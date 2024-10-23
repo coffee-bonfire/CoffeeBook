@@ -10,5 +10,5 @@ sealed class NavigationItem(var route: String, val icon: ImageVector?, var title
     object Setting : NavigationItem("History", Icons.Default.Settings, "Setting")
     object Book : NavigationItem("Book", Icons.Default.Home, "Book")
     object CoffeeBookEdit : NavigationItem("CoffeeBookEdit", Icons.Default.Home, "CoffeeBookEdit")
-
+    object PrivacyPolicy : NavigationItem("PrivacyPolicy", Icons.Default.Home, "PrivacyPolicy")
 }

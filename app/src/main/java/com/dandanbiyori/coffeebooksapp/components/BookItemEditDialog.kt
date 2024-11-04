@@ -155,7 +155,10 @@ fun BookItemEditDialog(
 }
 
 @Composable
-fun LoadItemImage(onImageLoaded: (Uri) -> Unit, bookImageUriString: String) {
+fun LoadItemImage(
+    onImageLoaded: (Uri) -> Unit,
+    bookImageUriString: String
+) {
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->

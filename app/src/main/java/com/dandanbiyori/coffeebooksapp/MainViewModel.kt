@@ -216,6 +216,7 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
                 bookItem.processing = processing
                 bookItem.roast = roast
                 bookItem.varieties = varieties
+                bookItem.imageUri = bookItemImageUri
                 bookItemDao.updateBookItem(bookItem)
             }
         }

@@ -23,33 +23,6 @@ class Util {
             return uri
         }
 
-        fun convertUriToBitmap(uri: Uri, context: Context): Bitmap? {
-            var imageBitmap: Bitmap? = null
-            val contentResolver: ContentResolver = context.contentResolver
-
-            try {
-                // UriからInputStreamを取得
-                val inputStream = contentResolver.openInputStream(uri)
-
-                // InputStreamからBitmapを生成
-                imageBitmap = BitmapFactory.decodeStream(inputStream)
-                imageBitmap = bitmapResize(imageBitmap)
-
-                // 必要に応じてInputStreamをクローズ
-                inputStream?.close()
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            return imageBitmap
-        }
-
-        private fun bitmapResize(bitmap: Bitmap): Bitmap {
-            val matrix = Matrix()
-            matrix.postScale(0.5f, 0.5f) // 0.5倍調整
-            return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-        }
-
         fun saveBookImageToInternalStorage(uri: Uri, context: Context): String {
             val imageFileName = "image_${System.currentTimeMillis()}.jpg"
             val booksDir = File(context.filesDir, "Books")

@@ -1,10 +1,8 @@
 package com.dandanbiyori.coffeebooksapp.components
 
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,18 +32,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.dandanbiyori.coffeebooksapp.Util.Companion.convertStringToUri
-import com.dandanbiyori.coffeebooksapp.Util.Companion.convertUriToBitmap
 import com.dandanbiyori.coffeebooksapp.Book
 import com.dandanbiyori.coffeebooksapp.NavigationItem
 import com.dandanbiyori.coffeebooksapp.R
@@ -70,17 +66,6 @@ fun BookRow(
 
     var expanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf<String?>(null) }
-
-    // uriをBitmapに変換
-    if (uri != null && uri.toString().isNotEmpty()) {
-        imageBitmap = convertUriToBitmap(uri, context)
-    }
-
-    // 変換できなかった場合や画像が存在しない場合はデフォルトの画像を使用する
-    if (imageBitmap == null) {
-        val drawable: Drawable? = ContextCompat.getDrawable(context, R.drawable.default_icon)
-        imageBitmap = drawable?.toBitmap()
-    }
 
     val deleteBookAction = SwipeAction(
         icon = {
@@ -124,8 +109,14 @@ fun BookRow(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
 
-                Image(
-                    bitmap = imageBitmap!!.asImageBitmap(),
+                AsyncImage(
+                    model = if (uri != null && uri.toString().isNotEmpty()) {
+                        uri
+                    } else {
+                        ImageRequest.Builder(LocalContext.current)
+                            .data(R.drawable.default_icon)
+                            .build()
+                    },
                     contentDescription = "Book Image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

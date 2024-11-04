@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
+import coil.compose.AsyncImage
 import com.dandanbiyori.coffeebooksapp.BookItem
 import com.dandanbiyori.coffeebooksapp.BookItemViewModel
 import com.dandanbiyori.coffeebooksapp.BooksItemType
@@ -154,8 +155,7 @@ fun BookItemDetailContent(
     val fontFamily = FontFamily.Monospace
     text = bookItem.description
 
-    // 画像をタップで画像を最大表示できないか。
-
+    // TODO 画像をタップで画像を最大表示できないか。
     Column(
         Modifier.verticalScroll(scrollState)
     ) {
@@ -339,28 +339,16 @@ fun BookItemDetailContent(
 private fun BookItemImage(
     bookItem: BookItem?
 ) {
-    var imageBitmap: Bitmap? = null
-    val context = LocalContext.current
     val uri: Uri? = bookItem?.let { Util.convertStringToUri(it.imageUri) }
-
-    // uriをBitmapに変換
-    if (uri != null && uri.toString().isNotEmpty()) {
-        imageBitmap = Util.convertUriToBitmap(uri, context)
-    }
-
-    // 変換できなかった場合や画像が存在しない場合はデフォルトの画像を使用する
-    if (imageBitmap == null) {
-        val drawable: Drawable? = ContextCompat.getDrawable(context, R.drawable.default_icon)
-        imageBitmap = drawable?.toBitmap()
-    }
 
     Box(
         Modifier
             .fillMaxWidth()
             .height(300.dp)
     ) {
-        Image(
-            bitmap = imageBitmap!!.asImageBitmap(),
+        AsyncImage(
+            // uriがnullの場合はデフォルト画像を表示
+            model = if (uri == null || uri.toString().isEmpty()) R.drawable.default_icon else uri,
             contentDescription = "Book Image",
             contentScale = ContentScale.Crop,
             modifier = Modifier

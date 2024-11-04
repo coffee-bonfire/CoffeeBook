@@ -57,6 +57,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.dandanbiyori.coffeebooksapp.BookItemViewModel
 import com.dandanbiyori.coffeebooksapp.R
 import com.dandanbiyori.coffeebooksapp.Util
+import com.dandanbiyori.coffeebooksapp.Util.Companion.saveBookItemImageToInternalStorage
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,6 +69,9 @@ fun CoffeeItemEdit(
     bookItemViewModel: BookItemViewModel,
     context: Context
 ) {
+    Log.e("test:title:","" + bookItemViewModel.title)
+    Log.e("test:uri:","" + bookItemViewModel.bookItemImageUri)
+
     var showDialog by remember { mutableStateOf(false) }
     val maxTitleLength = 20
     val maxCountryLength = 20
@@ -244,7 +248,6 @@ fun CoffeeItemEdit(
             Spacer(modifier = Modifier.height(16.dp)) // Card と Button の間にスペースを追加
 
             Button(
-                // TODO 画像が保存されてない。
                 onClick = {
                     // 編集中の場合は更新、それ以外の場合は新規作成
                     if (bookItemViewModel.isEditing) {
@@ -255,8 +258,7 @@ fun CoffeeItemEdit(
                             if (file.exists()) {
                                 file.delete()
                             }
-                            val savedImageUri =
-                                Util.saveBookItemImageToInternalStorage(newUri, context)
+                            val savedImageUri = saveBookItemImageToInternalStorage(newUri, context)
                             bookItemViewModel.bookItemImageUri = savedImageUri
                         }
                         bookItemViewModel.updateCoffeeBookItem()
@@ -265,7 +267,7 @@ fun CoffeeItemEdit(
                         selectedImageUri?.let { uri ->
                             // 選択された画像を内部ストレージに保存し、URIをViewModelに設定
                             val savedImageUri =
-                                Util.saveBookItemImageToInternalStorage(uri, context)
+                                saveBookItemImageToInternalStorage(uri, context)
                             bookItemViewModel.bookItemImageUri = savedImageUri
                         }
                         bookItemViewModel.createCoffeeBookItem(bookIdForDialog)
@@ -293,7 +295,6 @@ fun CoffeeItemEdit(
     }
 }
 
-// TODO 画像のアップロード機能追加
 @Composable
 fun LoadCoffeeItemImage(
     onImageLoaded: (Uri) -> Unit,
@@ -303,10 +304,14 @@ fun LoadCoffeeItemImage(
     // ViewModel の状態を使用
     val imageUri by bookItemViewModel.imageUri
     val isUpdating by bookItemViewModel.isUpdating
+    val bookImageUri = if (bookImageUriString == "") "" else Util.convertStringToUri(
+        bookImageUriString
+    )
 
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             Log.e("ImagePicker", "Selected image URI: $uri")
+            // imageUriに反映
             bookItemViewModel.updateImage(uri)
             // URIが変更されたときにコールバックを呼び出し
             uri?.let {
@@ -321,26 +326,53 @@ fun LoadCoffeeItemImage(
         )
         .clip(CircleShape)
 
-    if (bookImageUriString != "") {
-        val bookImageUri = Uri.parse(bookImageUriString)
-        bookItemViewModel.setImageUri(bookImageUri)
-    }
-
     // 画像が選択されていなければ空のBoxを表示
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp) // 画像の想定サイズ
-                .background(Color.LightGray)
-        ) {
-            if (isUpdating) {
-                // 更新中はプログレスバーを表示
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (imageUri != Uri.EMPTY && imageUri != null) {
-                Log.e("ImagePicker", "Selected image URI: $imageUri")
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp) // 画像の想定サイズ
+            .background(Color.LightGray)
+    ) {
+        if (isUpdating) {
+            // 更新中はプログレスバーを表示
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        } else if (imageUri != Uri.EMPTY && imageUri != null) {
+            Log.e("ImagePicker", "Selected image URI: $imageUri")
+            Image(
+                painter = rememberAsyncImagePainter(
+                    model = imageUri
+                ),
+                contentDescription = stringResource(R.string.dialog_user_select_image),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentScale = ContentScale.Crop
+            )
+
+            // 選択した画像が存在する場合は画像更新用ボタンを表示
+            // 画像更新ボタン
+            IconButton(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = Dimens.ToolbarIconPadding)
+                    .then(iconModifier)
+                    .size(50.dp)
+                    .background(Color.White.copy(alpha = 0.5f), CircleShape),
+                onClick = {
+                    bookItemViewModel.startUpdating()
+                    launcher.launch("image/*")
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "図鑑画像更新"
+                )
+            }
+        } else {
+            if (bookImageUri != null && bookImageUri != Uri.EMPTY) {
                 Image(
                     painter = rememberAsyncImagePainter(
-                        model = imageUri
+                        model = bookImageUri
                     ),
                     contentDescription = stringResource(R.string.dialog_user_select_image),
                     modifier = Modifier
@@ -348,30 +380,24 @@ fun LoadCoffeeItemImage(
                         .height(200.dp),
                     contentScale = ContentScale.Crop
                 )
-
-                // 選択した画像が存在する場合は画像更新用ボタンを表示
-                // 画像更新ボタン
+                // 画像が選択されていない場合は空のBoxを表示
+                // bookImageUriString の画像を表示
+                // bookImageUriをUriに変換
                 IconButton(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(end = Dimens.ToolbarIconPadding)
-                        .then(iconModifier)
-                        .size(50.dp)
-                        .background(Color.White.copy(alpha = 0.5f), CircleShape),
                     onClick = {
                         bookItemViewModel.startUpdating()
                         launcher.launch("image/*")
-                    }
+                    },
+                    modifier = Modifier
+                        .padding(end = Dimens.ToolbarIconPadding)
+                        .then(iconModifier)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "図鑑画像更新"
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "図鑑画像追加"
                     )
                 }
             } else {
-                Log.e("else", "empty")
-                Log.e("else2", imageUri.toString())
-                Log.e("else3", bookImageUriString)
                 // 画像が選択されていない場合は空のBoxを表示
                 // bookImageUriString の画像を表示
                 // bookImageUriをUriに変換
@@ -389,4 +415,5 @@ fun LoadCoffeeItemImage(
                 }
             }
         }
+    }
 }

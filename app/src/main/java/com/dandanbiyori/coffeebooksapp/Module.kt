@@ -19,6 +19,7 @@ object Module {
         @ApplicationContext context: Context
     ) = Room.databaseBuilder(context,AppDatabase::class.java, "book_database")
         .fallbackToDestructiveMigration()
+        .createFromAsset("predbdata/book_database.db")
         .build()
 
     @Provides

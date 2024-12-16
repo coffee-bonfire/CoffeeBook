@@ -1,6 +1,7 @@
 package com.dandanbiyori.coffeebooksapp
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -64,7 +65,7 @@ fun MainContent(
     bookItemViewModel: BookItemViewModel = hiltViewModel(),
 ) {
     Log.e("MainContent", "呼び出された")
-    val context = LocalContext.current
+    val context: Context = LocalContext.current
     var bookIdForDialog by remember { mutableStateOf(0) }
     val bookItem by bookItemViewModel.bookItem.collectAsState()
 
@@ -99,8 +100,12 @@ fun MainContent(
         // 図鑑アイテム一覧表示画面
         composable(
             // 渡したい値がある場合は、routeに引数プレースホルダーを追加する
-            route = "${NavigationItem.Home.route}/{BookId}",
+            route = "${NavigationItem.Home.route}/{isSystemCreated}/{BookId}",
             arguments = listOf(
+                navArgument("isSystemCreated") {
+                    type = NavType.BoolType
+                    nullable = false
+                },
                 navArgument("BookId") {
                     type = NavType.IntType
                     nullable = false
@@ -129,7 +134,8 @@ fun MainContent(
                     bookItemViewModel.deleteBookItem(it)
                     deleteImageInternalStorage(it.imageUri)
                 },
-                bookItemViewModel = bookItemViewModel
+                bookItemViewModel = bookItemViewModel,
+                isSystemCreated = backStackEntry.arguments?.getBoolean("isSystemCreated") ?: false,
             )
             Log.e("MainContent", "BookId: ${backStackEntry.arguments?.getInt("BookId")}")
             bookIdForDialog = backStackEntry.arguments?.getInt("BookId")!!
@@ -138,8 +144,12 @@ fun MainContent(
         // 図鑑アイテム詳細表示画面
         composable(
             // 渡したい値がある場合は、routeに引数プレースホルダーを追加する
-            route = "${NavigationItem.Home.route}/{BookId}/{BookItemId}",
+            route = "${NavigationItem.Home.route}/{isSystemCreated}/{BookId}/{BookItemId}",
             arguments = listOf(
+                navArgument("isSystemCreated") {
+                    type = NavType.BoolType
+                    nullable = false
+                },
                 navArgument("BookId") {
                     type = NavType.IntType
                     nullable = false
@@ -158,6 +168,7 @@ fun MainContent(
                     onClickBack = {
                         navController.navigateUp()
                         bookItemViewModel.resetBookItem()
+                        bookItemViewModel.resetProperties()
                     },
                     onClickEdit = {
                         bookItemViewModel.setEditingBookItem(it)
@@ -173,7 +184,8 @@ fun MainContent(
                     },
                     bookItem = bookItem!!,
                     bookItemViewModel,
-                )
+                    isSystemCreated = backStackEntry.arguments?.getBoolean("isSystemCreated") ?: false,
+                    )
             }
             bookIdForDialog = backStackEntry.arguments?.getInt("BookItemId")!!
         }

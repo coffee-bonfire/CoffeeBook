@@ -391,6 +391,7 @@ fun LoadCoffeeItemImage(
                     modifier = Modifier
                         .padding(end = Dimens.ToolbarIconPadding)
                         .then(iconModifier)
+                        .align(Alignment.Center)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,

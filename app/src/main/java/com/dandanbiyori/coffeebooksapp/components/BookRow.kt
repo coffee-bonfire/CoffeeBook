@@ -1,6 +1,5 @@
 package com.dandanbiyori.coffeebooksapp.components
 
-import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -56,11 +55,10 @@ fun BookRow(
     onClickUpdate: (Book) -> Unit,
     onClickDelete: (Book) -> Unit,
     navController: NavController,
+    isSystemCreated: Boolean
 ) {
     // ストレージに保存してあるパスからuriを作成
     val uri: Uri? = convertStringToUri(book.imageUri)
-    val context = LocalContext.current
-    var imageBitmap: Bitmap? = null
     var showDiscribeDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -79,12 +77,15 @@ fun BookRow(
         background = Color.Red,
         isUndo = true,
         onSwipe = {
-            showDeleteDialog = true
+            // ユーザが作った図鑑の場合のみ削除可能
+            if (!isSystemCreated){
+                showDeleteDialog = true
+            }
         },
     )
 
     SwipeableActionsBox(
-        endActions = listOf(deleteBookAction)
+        endActions = if(!isSystemCreated) listOf(deleteBookAction) else listOf(),
     ) {
         // Swipeable content goes here.
         Card(
@@ -99,7 +100,7 @@ fun BookRow(
             Row(
                 modifier = Modifier.combinedClickable(
                     onClick = {
-                        navController.navigate("${NavigationItem.Home.route}/${book.id}")
+                        navController.navigate("${NavigationItem.Home.route}/${isSystemCreated}/${book.id}")
                     },
                     onLongClick = {
                         showDiscribeDialog = true
@@ -129,8 +130,8 @@ fun BookRow(
                 ) {
                     Text(
                         // タイトルが長すぎる場合は省略する
-                        text = if (book.title.length > 10) {
-                            book.title.substring(0, 10) + "..."
+                        text = if (book.title.length > 15) {
+                            book.title.substring(0, 15) + "..."
                         } else {
                             book.title
                         },
@@ -140,46 +141,49 @@ fun BookRow(
                         )
                     )
                 }
-                Spacer(modifier = Modifier.weight(1f))
-
-                Column {
-                    IconButton(
-                        onClick = {
-                            expanded = true
-                        },
-                        modifier = Modifier.size(24.dp),
-                    ) {
-                        Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Book edit")
-                    }
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Edit") },
+                if (!isSystemCreated) {
+                    Spacer(modifier = Modifier.weight(1f))
+                    Column {
+                        IconButton(
                             onClick = {
-                                expanded = false
-                                selectedOption = "edit"
-                                onClickUpdate(book)
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Delete") },
-                            onClick = {
-                                expanded = false
-                                selectedOption = "delete"
-                                showDeleteDialog = true
-                            }
-                        )
+                                expanded = true
+                            },
+                            modifier = Modifier.size(24.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Book edit"
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Edit") },
+                                onClick = {
+                                    expanded = false
+                                    selectedOption = "edit"
+                                    onClickUpdate(book)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Delete") },
+                                onClick = {
+                                    expanded = false
+                                    selectedOption = "delete"
+                                    showDeleteDialog = true
+                                }
+                            )
+                        }
                     }
-
                 }
                 // 図鑑説明用ダイアログ表示
                 if (showDiscribeDialog) {
                     AlertDialog(
                         onDismissRequest = { showDiscribeDialog = false },
-                        title = if (book.title.length > 10) {
-                            { Text(book.title.substring(0, 10) + "...") }
+                        title = if (book.title.length > 15) {
+                            { Text(book.title.substring(0, 15) + "...") }
                         } else {
                             { Text(book.title) }
                         },

@@ -1,6 +1,5 @@
 package com.dandanbiyori.coffeebooksapp.components
 
-import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
@@ -86,9 +85,9 @@ fun BookDetail(
     onClickOpenDialog: (BookItemViewModel) -> Unit,
     onClickDelete: (BookItem) -> Unit,
     bookItemViewModel: BookItemViewModel,
+    isSystemCreated: Boolean
 ) {
     Log.e("BookDetail", "呼び出された")
-
     val targetBookItems = mutableListOf<BookItem>()
     val bookItems by bookItemViewModel.bookItemsByBookId.collectAsState()
     // LaunchedEffect を使用して getBookItemsByBookId を呼び出す
@@ -154,6 +153,11 @@ fun BookDetail(
             )
         },
         floatingActionButton = {
+            // isSystemCreatedがtrueの場合、FloatingActionButtonを表示しない
+            if (isSystemCreated) {
+                return@Scaffold
+            }
+
             val simpleItem = "Simple Item"
             val coffeeItem = "Coffee Item"
             var expanded by remember { mutableStateOf(false) }
@@ -212,7 +216,6 @@ fun BookDetail(
                     count = targetBookItems.size,
                     key = { index -> index },
                     itemContent = { index ->
-                        // BUG デフォルトの画像が表示される事象がある
                         BookDeteilScreen(
                             targetBookItems[index],
                             bookId,
@@ -221,7 +224,8 @@ fun BookDetail(
                             onClickDelete,
                             onClickUpdateBookItem = {
                                 bookItemViewModel.setBookItemsByBookId(it)
-                            }
+                            },
+                            isSystemCreated = isSystemCreated
                         )
                     }
                 )
@@ -240,10 +244,9 @@ fun BookDeteilScreen(
     onClickUpdate: (BookItem) -> Unit,
     onClickDelete: (BookItem) -> Unit,
     onClickUpdateBookItem: (Int) -> Unit,
+    isSystemCreated: Boolean
 ) {
     Log.e("BookDeteilScreen", "呼び出された")
-    var imageBitmap: Bitmap? = null
-    val context = LocalContext.current
     val uri: Uri? = bookItem.let { Util.convertStringToUri(it.imageUri) }
 
     var expanded by remember { mutableStateOf(false) }
@@ -251,7 +254,7 @@ fun BookDeteilScreen(
 
     Card(
         onClick = {
-            navController.navigate("${NavigationItem.Home.route}/${bookId}/${bookItem.id}")
+            navController.navigate("${NavigationItem.Home.route}/${isSystemCreated}/${bookId}/${bookItem.id}")
         },
         colors = CardDefaults.cardColors(containerColor = Color(0xFFD3A780)),
         modifier = Modifier
@@ -270,8 +273,8 @@ fun BookDeteilScreen(
                     },
                     contentDescription = "",
                     Modifier
-                    .fillMaxWidth()
-                    .height(dimensionResource(id = R.dimen.book_item_image_height)),
+                        .fillMaxWidth()
+                        .height(dimensionResource(id = R.dimen.book_item_image_height)),
                     contentScale = ContentScale.Crop
                 )
                 Row( // Use Row for horizontal layout
@@ -280,35 +283,36 @@ fun BookDeteilScreen(
                         .padding(8.dp),
                     horizontalArrangement = Arrangement.End // Align to the end (right)
                 ) {
-                    IconButton(
-                        onClick = { expanded = true },
-                        modifier = Modifier.size(24.dp) // Maintain size
-                    ) {
-                        Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Book edit")
-                    }
-
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Edit") },
-                            onClick = {
-                                expanded = false
-                                selectedOption = "edit"
-                                onClickUpdate(bookItem)
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Delete") },
-                            onClick = {
-                                expanded = false
-                                selectedOption = "delete"
-                                onClickDelete(bookItem)
-                                onClickUpdateBookItem(bookId)
-                                Log.e("onClickDelete", "呼び出された")
-                            }
-                        )
+                    if (!isSystemCreated) {
+                        IconButton(
+                            onClick = { expanded = true },
+                            modifier = Modifier.size(24.dp) // Maintain size
+                        ) {
+                            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Book edit")
+                        }
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Edit") },
+                                onClick = {
+                                    expanded = false
+                                    selectedOption = "edit"
+                                    onClickUpdate(bookItem)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Delete") },
+                                onClick = {
+                                    expanded = false
+                                    selectedOption = "delete"
+                                    onClickDelete(bookItem)
+                                    onClickUpdateBookItem(bookId)
+                                    Log.e("onClickDelete", "呼び出された")
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -337,7 +341,7 @@ fun ItemUi(
     title: String,
     onClickOpenDialog: (BookItemViewModel) -> Unit,
     navController: NavController,
-    bookItemViewModel:BookItemViewModel,
+    bookItemViewModel: BookItemViewModel,
 ) {
     val context = LocalContext.current
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End) {

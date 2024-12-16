@@ -1,12 +1,9 @@
 package com.dandanbiyori.coffeebooksapp.components
 
 
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,16 +39,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
 import coil.compose.AsyncImage
 import com.dandanbiyori.coffeebooksapp.BookItem
 import com.dandanbiyori.coffeebooksapp.BookItemViewModel
@@ -63,9 +56,10 @@ import com.dandanbiyori.coffeebooksapp.Util
 fun BookItemDetailView(
     onClickBack: () -> Unit,
     onClickEdit: (BookItem) -> Unit,
-    onClickUpdate : (BookItem) -> Unit,
+    onClickUpdate: (BookItem) -> Unit,
     bookItem: BookItem,
-    bookItemViewModel: BookItemViewModel
+    bookItemViewModel: BookItemViewModel,
+    isSystemCreated: Boolean,
 ) {
     Log.e("BookItemDetailView", "呼び出された")
     Box(
@@ -75,11 +69,13 @@ fun BookItemDetailView(
             bookItem,
             onClickEdit,
             bookItemViewModel,
+            isSystemCreated
         )
         BookItemDetailTopBar(
             onClickBack,
             onClickUpdate,
-            bookItem
+            bookItem,
+            isSystemCreated
         )
     }
 
@@ -89,7 +85,8 @@ fun BookItemDetailView(
 fun BookItemDetailTopBar(
     onClickBack: () -> Unit,
     onClickUpdate: (BookItem) -> Unit,
-    bookItem: BookItem
+    bookItem: BookItem,
+    isSystemCreated: Boolean
 ) {
     Row(
         modifier = Modifier
@@ -120,22 +117,22 @@ fun BookItemDetailTopBar(
                 tint = MaterialTheme.colorScheme.onSurface
             )
         }
-
-        IconButton(
-            onClick = {
-                onClickUpdate(bookItem)
-            },
-            modifier = Modifier
-                .padding(end = Dimens.ToolbarIconPadding)
-                .then(iconModifier)
-        ) {
-            Icon(
-                Icons.Filled.Edit,
-                contentDescription = "Icon",
-                tint = MaterialTheme.colorScheme.onSurface
-            )
+        if (!isSystemCreated) {
+            IconButton(
+                onClick = {
+                    onClickUpdate(bookItem)
+                },
+                modifier = Modifier
+                    .padding(end = Dimens.ToolbarIconPadding)
+                    .then(iconModifier)
+            ) {
+                Icon(
+                    Icons.Filled.Edit,
+                    contentDescription = "Icon",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
-
     }
 }
 
@@ -144,7 +141,8 @@ fun BookItemDetailTopBar(
 fun BookItemDetailContent(
     bookItem: BookItem,
     onClickEdit: (BookItem) -> Unit,
-    bookItemViewModel: BookItemViewModel
+    bookItemViewModel: BookItemViewModel,
+    isSystemCreated: Boolean,
 ) {
     Log.e("BookItemDetailContent", "呼び出された")
     val scrollState = rememberScrollState()
@@ -154,6 +152,15 @@ fun BookItemDetailContent(
     val switchInputFlag = remember { mutableStateOf(false) }
     val fontFamily = FontFamily.Monospace
     text = bookItem.description
+    val titleStrings = listOf("Title", "Country", "Varieties", "Processing", "Flavor", "Roast")
+    val titleValues = listOf(
+        bookItem.title,
+        bookItem.country,
+        bookItem.varieties,
+        bookItem.processing,
+        bookItem.flavor,
+        bookItem.roast
+    )
 
     // TODO 画像をタップで画像を最大表示できないか。
     Column(
@@ -165,7 +172,7 @@ fun BookItemDetailContent(
                 modifier = Modifier.combinedClickable(
                     onClick = {},
                     onLongClick = {
-                        if (bookItem.type == BooksItemType.SIMPLE_ITEM){
+                        if (bookItem.type == BooksItemType.SIMPLE_ITEM && !isSystemCreated) {
                             switchInputFlag.value = true
                             onClickEdit(bookItem)
                         }
@@ -179,48 +186,20 @@ fun BookItemDetailContent(
                     Log.e("BookItemDetailContent_Column", "呼び出された")
                     Column(
                         modifier = Modifier
-                            .padding(16.dp),
+                            .padding(16.dp)
+                            .fillMaxWidth(),
                     ) {
-                        Text(
-                            text = bookItemViewModel.title,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = bookItemViewModel.country,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = bookItemViewModel.varieties,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = bookItemViewModel.processing,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = bookItemViewModel.flavor,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = bookItemViewModel.roast,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        titleStrings.zip(titleValues).forEach { (label, value) ->
+                            LabelAndValue(label = label, value = value)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
                     }
-
 
                 } else {
                     Text(
                         // 10文字を超過したら省略
-                        text = if (bookItem.title.length > 10) {
-                            bookItem.title.substring(0, 10) + "..."
+                        text = if (bookItem.title.length > 15) {
+                            bookItem.title.substring(0, 15) + "..."
                         } else {
                             bookItem.title
                         },
@@ -288,42 +267,45 @@ fun BookItemDetailContent(
                                 )
                             }
                         }
+                        if (!isSystemCreated) {
+                            Row {
+                                Spacer(modifier = Modifier.weight(1f)) // 空白を挿入
+                                if (!switchInputFlag.value) {
+                                    Button(
+                                        onClick = {
+                                            Log.e("Button.book", bookItem.title)
+                                            switchInputFlag.value = true
+                                            onClickEdit(bookItem)
+                                        },
+                                    ) {
+                                        Text("Edit")
+                                    }
+                                } else {
+                                    Button(
+                                        onClick = {
+                                            switchInputFlag.value = false
+                                            text = bookItem.description
+                                        },
+                                    ) {
+                                        Text("Back")
+                                    }
+                                    Button(
+                                        onClick = {
+                                            // ユーザ入力値でDB更新
+                                            bookItemViewModel.updateBookItem()
+                                            text = bookItem.description
+                                            switchInputFlag.value = false
+                                            bookItemViewModel.resetProperties()
+                                        },
+                                    ) {
+                                        Text("Save")
+                                    }
+                                }
 
-                        Row {
-                            Spacer(modifier = Modifier.weight(1f)) // 空白を挿入
-                            if (!switchInputFlag.value) {
-                                Button(
-                                    onClick = {
-                                        Log.e("Button.book", bookItem.title)
-                                        switchInputFlag.value = true
-                                        onClickEdit(bookItem)
-                                    },
-                                ) {
-                                    Text("Edit")
-                                }
-                            } else {
-                                Button(
-                                    onClick = {
-                                        switchInputFlag.value = false
-                                        text = bookItem.description
-                                    },
-                                ) {
-                                    Text("Back")
-                                }
-                                Button(
-                                    onClick = {
-                                        // ユーザ入力値でDB更新
-                                        bookItemViewModel.updateBookItem()
-                                        text = bookItem.description
-                                        switchInputFlag.value = false
-                                        bookItemViewModel.resetProperties()
-                                    },
-                                ) {
-                                    Text("Save")
-                                }
                             }
 
                         }
+
 
                     }
 
@@ -354,6 +336,21 @@ private fun BookItemImage(
             modifier = Modifier
                 .fillMaxHeight()
                 .fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+fun LabelAndValue(label: String, value: String) {
+    Row(verticalAlignment = Alignment.Top) {
+        Text(
+            text = "$label: ",
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp
+        )
+        Text(
+            text = value,
+            fontSize = 20.sp
         )
     }
 }

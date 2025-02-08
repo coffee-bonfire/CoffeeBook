@@ -1,0 +1,56 @@
+name: Pull Request # ワークフローの名前
+
+on: # ワークフローの発動条件
+  pull_request: # プルリクエスト
+    branches: # 対象ブランチ
+      - main
+    types: # イベントタイプ
+      - closed # プルリクエストがクローズされたとき
+
+permissions: # 権限
+  contents: write # リポジトリコンテンツへの書き込み権限
+  actions: read # GitHub Actions への読み取り権限
+
+jobs: # ジョブ
+  build: # ジョブの名前
+    if: github.event.pull_request.merged == true # プルリクエストがマージされたときのみ実行
+    runs-on: ubuntu-latest # 実行環境
+
+    steps: # ステップ
+      - name: Checkout # チェックアウト
+        uses: actions/checkout@v4 # actions/checkout@v4 を使用
+
+      - name: Set Up JDK # JDK のセットアップ
+        uses: actions/setup-java@v4 # actions/setup-java@v4 を使用
+        with: # 設定
+          distribution: 'zulu' # Zulu ディストリビューション
+          java-version: '18' # Java 18
+          cache: 'gradle' # Gradle キャッシュ
+
+      - name: Setup Gradle # Gradle のセットアップ
+        uses: gradle/gradle-build-action@v2 # gradle/gradle-build-action@v2 を使用
+
+      - name: Build With Gradle # Gradle でビルド
+        run: | # 実行コマンド,デバッグビルド
+          ./gradlew assembleDebug 
+
+      - name: Upload APK # APK のアップロード
+        uses: actions/upload-artifact@v3 # actions/upload-artifact@v3 を使用
+        with: # 設定
+          name: app-debug.apk # アーティファクト名
+          path: app/build/outputs/apk/debug/app-debug.apk # APK のパス
+
+      - name: Install Github CLI # GitHub CLI のインストール
+        run: | # 実行コマンド,インストールスクリプトを実行
+          curl -fsSL https://cli.github.com/install.sh | sh 
+          echo "$HOME/.local/bin" >> $GITHUB_PATH # パスを通す
+
+      - name: Generate comment # コメント生成
+        run: | # 実行コマンド,コメント内容をファイルに書き込む
+          echo "デバッグ APK が生成されました。ダウンロードはこちら: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/app-debug.apk" > comment.txt
+
+      - name: Add comment to PR # PR にコメントを追加
+        run: | # 実行コマンド,コメント追加
+          gh pr comment "$(< comment.txt)" --repo "${{ github.repository }}" --number "${{ github.event.pull_request.number }}"
+        env: # 環境変数
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub トークン

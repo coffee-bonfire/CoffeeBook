@@ -35,7 +35,7 @@ jobs: # ジョブ
           ./gradlew assembleDebug 
 
       - name: Upload APK # APK のアップロード
-        uses: actions/upload-artifact@v3 # actions/upload-artifact@v3 を使用
+        uses: actions/upload-artifact@v4 # v4 以降に変更
         with: # 設定
           name: app-debug.apk # アーティファクト名
           path: app/build/outputs/apk/debug/app-debug.apk # APK のパス

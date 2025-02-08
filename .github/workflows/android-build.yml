@@ -43,7 +43,7 @@ jobs: # ジョブ
       - name: Install Github CLI # GitHub CLI のインストール
         run: | # 実行コマンド,インストールスクリプトを実行
           curl -fsSL https://cli.github.com/install.sh | sh 
-          echo "$HOME/.local/bin" >> $GITHUB_PATH # パスを通す
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Generate comment # コメント生成
         run: | # 実行コマンド,コメント内容をファイルに書き込む

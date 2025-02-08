@@ -1,2 +1,5 @@
 /build
 google-services.json
+.idea/*
+!.idea/gradle.xml
+!.idea/misc.xml

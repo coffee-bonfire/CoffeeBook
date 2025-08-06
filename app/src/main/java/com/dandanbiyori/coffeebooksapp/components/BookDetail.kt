@@ -213,8 +213,9 @@ fun BookDetail(
                 contentPadding = PaddingValues(all = dimensionResource(id = R.dimen.card_side_margin))
             ) {
                 items(
-                    count = targetBookItems.size,
-                    key = { index -> index },
+                    // bookItems
+                    count = bookItems.size,
+                    key = { index -> bookItems[index].id },
                     itemContent = { index ->
                         BookDeteilScreen(
                             targetBookItems[index],

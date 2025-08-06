@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalFoundationApi::class)
 
-package com.dandanbiyori.coffeebooksapp.components
+package com.dandanbiyori.coffeebooksapp.ui
 
 import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
@@ -39,6 +39,9 @@ import androidx.navigation.NavController
 import com.dandanbiyori.coffeebooksapp.Book
 import com.dandanbiyori.coffeebooksapp.BookViewModel
 import com.dandanbiyori.coffeebooksapp.R
+import com.dandanbiyori.coffeebooksapp.components.BottomNavigationBar
+import com.dandanbiyori.coffeebooksapp.components.CoffeeBookList
+import com.dandanbiyori.coffeebooksapp.components.UserBookList
 import kotlinx.coroutines.launch
 
 @SuppressLint("SuspiciousIndentation")

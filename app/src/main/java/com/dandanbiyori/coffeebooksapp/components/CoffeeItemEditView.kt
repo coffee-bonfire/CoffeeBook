@@ -6,20 +6,24 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -44,10 +48,12 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -58,9 +64,10 @@ import com.dandanbiyori.coffeebooksapp.BookItemViewModel
 import com.dandanbiyori.coffeebooksapp.R
 import com.dandanbiyori.coffeebooksapp.Util
 import com.dandanbiyori.coffeebooksapp.Util.Companion.saveBookItemImageToInternalStorage
+import kotlinx.coroutines.launch
 import java.io.File
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun CoffeeItemEdit(
     onClickBack: () -> Unit,
@@ -69,8 +76,8 @@ fun CoffeeItemEdit(
     bookItemViewModel: BookItemViewModel,
     context: Context
 ) {
-    Log.e("test:title:","" + bookItemViewModel.title)
-    Log.e("test:uri:","" + bookItemViewModel.bookItemImageUri)
+    Log.e("test:title:", "" + bookItemViewModel.title)
+    Log.e("test:uri:", "" + bookItemViewModel.bookItemImageUri)
 
     var showDialog by remember { mutableStateOf(false) }
     val maxTitleLength = 20
@@ -80,7 +87,10 @@ fun CoffeeItemEdit(
     val maxFlavorLength = 30
     val maxRoastLength = 15
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    var isImageFlag by remember { mutableStateOf(false) }
+
+    // coroutineScopeとは
+    val coroutineScope = rememberCoroutineScope()
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
 
     // バックボタンが押されたときの処理
     BackHandler {
@@ -115,7 +125,6 @@ fun CoffeeItemEdit(
             )
         }
     ) { padding ->
-        val scrollState = rememberScrollState()
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
@@ -144,154 +153,219 @@ fun CoffeeItemEdit(
 
             )
         }
-        Column(
+        LazyColumn(
             modifier = Modifier
-                .padding(padding)
-                .fillMaxWidth()
-                .verticalScroll(scrollState)
-            // Column の幅を最大化
+                .fillMaxSize() // または適切なサイズ
+                .imePadding() // LazyColumn全体に適用して、リスト自体をキーボード上に持ち上げる
         ) {
-            LoadCoffeeItemImage(
-                { imageUri ->
-                    selectedImageUri = imageUri
-                },
-                bookItemViewModel.bookItemImageUri,
-                bookItemViewModel
-            )
+            item {
+                LoadCoffeeItemImage(
+                    { imageUri ->
+                        selectedImageUri = imageUri
+                    },
+                    bookItemViewModel.bookItemImageUri,
+                    bookItemViewModel
+                )
+            }
 
-            Card(
-                onClick = {},
-                modifier = Modifier
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(0.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White,
-                ),
-            ) {
-                Column(
+            item {
+                Card(
                     modifier = Modifier
-                        .padding(16.dp)
-                        .imePadding(),
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(0.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White,
+                    ),
                 ) {
-                    // 各項目を OutlinedTextField でラップし、ラベルを追加
-                    OutlinedTextField(
-                        value = bookItemViewModel.title,
-                        onValueChange = {
-                            if (it.length <= maxTitleLength) {
-                                bookItemViewModel.title = it
-                            }
-                        },
-                        label = { Text("title") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .imePadding(),
+                    ) {
+                        // 各項目を OutlinedTextField でラップし、ラベルを追加
+                        OutlinedTextField(
+                            value = bookItemViewModel.title,
+                            onValueChange = {
+                                if (it.length <= maxTitleLength) {
+                                    bookItemViewModel.title = it
+                                }
+                            },
+                            label = { Text("title") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .bringIntoViewRequester(bringIntoViewRequester) // RequesterをTextFieldに紐付け
+                                .onFocusEvent { focusState ->
+                                    if (focusState.isFocused) {
+                                        coroutineScope.launch {
+                                            bringIntoViewRequester.bringIntoView()
+                                        }
+                                    }
+                                }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    OutlinedTextField(
-                        value = bookItemViewModel.country,
-                        onValueChange = {
-                            if (it.length <= maxCountryLength) {
-                                bookItemViewModel.country = it
-                            }
-                        },
-                        label = { Text("country") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = bookItemViewModel.country,
+                            onValueChange = {
+                                if (it.length <= maxCountryLength) {
+                                    bookItemViewModel.country = it
+                                }
+                            },
+                            label = { Text("country") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .bringIntoViewRequester(bringIntoViewRequester) // RequesterをTextFieldに紐付け
+                                .onFocusEvent { focusState ->
+                                    if (focusState.isFocused) {
+                                        coroutineScope.launch {
+                                            bringIntoViewRequester.bringIntoView()
+                                        }
+                                    }
+                                }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    OutlinedTextField(
-                        value = bookItemViewModel.varieties,
-                        onValueChange = {
-                            if (it.length <= maxVarietiesLength) {
-                                bookItemViewModel.varieties = it
-                            }
-                        },
-                        label = { Text("varieties") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = bookItemViewModel.processing,
-                        onValueChange = {
-                            if (it.length <= maxProcessingLength) {
-                                bookItemViewModel.processing = it
-                            }
-                        },
-                        label = { Text("processing") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = bookItemViewModel.flavor,
-                        onValueChange = {
-                            if (it.length <= maxFlavorLength) {
-                                bookItemViewModel.flavor = it
-                            }
-                        },
-                        label = { Text("flavor") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = bookItemViewModel.roast,
-                        onValueChange = {
-                            if (it.length <= maxRoastLength) {
-                                bookItemViewModel.roast = it
-                            }
-                        },
-                        label = { Text("roast") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = bookItemViewModel.varieties,
+                            onValueChange = {
+                                if (it.length <= maxVarietiesLength) {
+                                    bookItemViewModel.varieties = it
+                                }
+                            },
+                            label = { Text("varieties") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .bringIntoViewRequester(bringIntoViewRequester) // RequesterをTextFieldに紐付け
+                                .onFocusEvent { focusState ->
+                                    if (focusState.isFocused) {
+                                        coroutineScope.launch {
+                                            bringIntoViewRequester.bringIntoView()
+                                        }
+                                    }
+                                }
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = bookItemViewModel.processing,
+                            onValueChange = {
+                                if (it.length <= maxProcessingLength) {
+                                    bookItemViewModel.processing = it
+                                }
+                            },
+                            label = { Text("processing") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .bringIntoViewRequester(bringIntoViewRequester) // RequesterをTextFieldに紐付け
+                                .onFocusEvent { focusState ->
+                                    if (focusState.isFocused) {
+                                        coroutineScope.launch {
+                                            bringIntoViewRequester.bringIntoView()
+                                        }
+                                    }
+                                }
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = bookItemViewModel.flavor,
+                            onValueChange = {
+                                if (it.length <= maxFlavorLength) {
+                                    bookItemViewModel.flavor = it
+                                }
+                            },
+                            label = { Text("flavor") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .bringIntoViewRequester(bringIntoViewRequester) // RequesterをTextFieldに紐付け
+                                .onFocusEvent { focusState ->
+                                    if (focusState.isFocused) {
+                                        coroutineScope.launch {
+                                            bringIntoViewRequester.bringIntoView()
+                                        }
+                                    }
+                                }
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = bookItemViewModel.roast,
+                            onValueChange = {
+                                if (it.length <= maxRoastLength) {
+                                    bookItemViewModel.roast = it
+                                }
+                            },
+                            label = { Text("roast") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .bringIntoViewRequester(bringIntoViewRequester) // RequesterをTextFieldに紐付け
+                                .onFocusEvent { focusState ->
+                                    if (focusState.isFocused) {
+                                        coroutineScope.launch {
+                                            bringIntoViewRequester.bringIntoView()
+                                        }
+                                    }
+                                }
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
+            item {
+                Spacer(modifier = Modifier.height(16.dp)) // Card と Button の間にスペースを追加
+            }
 
-            Spacer(modifier = Modifier.height(16.dp)) // Card と Button の間にスペースを追加
-
-            Button(
-                onClick = {
-                    // 編集中の場合は更新、それ以外の場合は新規作成
-                    if (bookItemViewModel.isEditing) {
-                        selectedImageUri?.let { newUri ->
-                            val oldBookUri: Uri? =
-                                Util.convertStringToUri(bookItemViewModel.bookItemImageUri)
-                            val file = File(oldBookUri?.path ?: "")
-                            if (file.exists()) {
-                                file.delete()
+            item {
+                Button(
+                    onClick = {
+                        // 編集中の場合は更新、それ以外の場合は新規作成
+                        if (bookItemViewModel.isEditing) {
+                            selectedImageUri?.let { newUri ->
+                                val oldBookUri: Uri? =
+                                    Util.convertStringToUri(bookItemViewModel.bookItemImageUri)
+                                val file = File(oldBookUri?.path ?: "")
+                                if (file.exists()) {
+                                    file.delete()
+                                }
+                                val savedImageUri =
+                                    saveBookItemImageToInternalStorage(newUri, context)
+                                bookItemViewModel.bookItemImageUri = savedImageUri
                             }
-                            val savedImageUri = saveBookItemImageToInternalStorage(newUri, context)
-                            bookItemViewModel.bookItemImageUri = savedImageUri
+                            bookItemViewModel.updateCoffeeBookItem()
+                        } else {
+                            // 画像を選択している場合は画像を保存
+                            selectedImageUri?.let { uri ->
+                                // 選択された画像を内部ストレージに保存し、URIをViewModelに設定
+                                val savedImageUri =
+                                    saveBookItemImageToInternalStorage(uri, context)
+                                bookItemViewModel.bookItemImageUri = savedImageUri
+                            }
+                            bookItemViewModel.createCoffeeBookItem(bookIdForDialog)
                         }
-                        bookItemViewModel.updateCoffeeBookItem()
-                    } else {
-                        // 画像を選択している場合は画像を保存
-                        selectedImageUri?.let { uri ->
-                            // 選択された画像を内部ストレージに保存し、URIをViewModelに設定
-                            val savedImageUri =
-                                saveBookItemImageToInternalStorage(uri, context)
-                            bookItemViewModel.bookItemImageUri = savedImageUri
-                        }
-                        bookItemViewModel.createCoffeeBookItem(bookIdForDialog)
-                    }
-                    onClickBack()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .imePadding(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFD3A780),
-                    contentColor = Color.White
-                )
+                        onClickBack()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .imePadding()
+                        .bringIntoViewRequester(bringIntoViewRequester) // RequesterをTextFieldに紐付け
+                        .onFocusEvent { focusState ->
+                            if (focusState.isFocused) {
+                                coroutineScope.launch {
+                                    bringIntoViewRequester.bringIntoView()
+                                }
+                            }
+                        },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFD3A780),
+                        contentColor = Color.White
+                    )
 
-            ) {
-                Text(
-                    text = "Save",
-                    color = Color.Black
-                )
+                ) {
+                    Text(
+                        text = "Save",
+                        color = Color.Black
+                    )
+                }
             }
         }
-
-
     }
 }
 

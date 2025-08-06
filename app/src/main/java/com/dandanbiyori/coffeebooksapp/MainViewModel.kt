@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dandanbiyori.coffeebooksapp.Util.Companion.deleteImageInternalStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -259,5 +260,11 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
                 _bookItemsByBookId.value = it
             }
         }
+    }
+
+    fun deleteImage(
+        imageString: String
+    ){
+        deleteImageInternalStorage(imageString)
     }
 }

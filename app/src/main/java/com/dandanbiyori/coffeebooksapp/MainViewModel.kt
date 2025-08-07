@@ -100,6 +100,7 @@ class BookItemViewModel @Inject constructor(private val bookItemDao: BookItemDao
     private val _bookItemsByBookId = MutableStateFlow<List<BookItem>>(emptyList())
     var bookItemsByBookId = _bookItemsByBookId.asStateFlow()
 
+    // editingBookItemを監視し変更時にフラグを変更する
     val isEditing: Boolean
         get() = editingBookItem != null
 

@@ -79,7 +79,6 @@ import com.dandanbiyori.coffeebooksapp.Util
 @Composable
 fun BookDetail(
     bookId: Int,
-    onClickBack: () -> Unit,
     onClickUpdate: (BookItem) -> Unit,
     navController: NavController,
     onClickOpenDialog: (BookItemViewModel) -> Unit,
@@ -226,7 +225,8 @@ fun BookDetail(
                             onClickUpdateBookItem = {
                                 bookItemViewModel.setBookItemsByBookId(it)
                             },
-                            isSystemCreated = isSystemCreated
+                            isSystemCreated = isSystemCreated,
+                            bookItemViewModel
                         )
                     }
                 )
@@ -245,13 +245,17 @@ fun BookDeteilScreen(
     onClickUpdate: (BookItem) -> Unit,
     onClickDelete: (BookItem) -> Unit,
     onClickUpdateBookItem: (Int) -> Unit,
-    isSystemCreated: Boolean
+    isSystemCreated: Boolean,
+    bookItemViewModel : BookItemViewModel
 ) {
     Log.e("BookDeteilScreen", "呼び出された")
     val uri: Uri? = bookItem.let { Util.convertStringToUri(it.imageUri) }
 
     var expanded by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        bookItemViewModel.resetProperties()
+    }
 
     Card(
         onClick = {
@@ -299,7 +303,6 @@ fun BookDeteilScreen(
                                 text = { Text("Edit") },
                                 onClick = {
                                     expanded = false
-                                    selectedOption = "edit"
                                     onClickUpdate(bookItem)
                                 }
                             )
@@ -307,7 +310,6 @@ fun BookDeteilScreen(
                                 text = { Text("Delete") },
                                 onClick = {
                                     expanded = false
-                                    selectedOption = "delete"
                                     onClickDelete(bookItem)
                                     onClickUpdateBookItem(bookId)
                                     Log.e("onClickDelete", "呼び出された")
@@ -344,7 +346,6 @@ fun ItemUi(
     navController: NavController,
     bookItemViewModel: BookItemViewModel,
 ) {
-    val context = LocalContext.current
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End) {
         Spacer(modifier = Modifier.weight(1f))
         Box(

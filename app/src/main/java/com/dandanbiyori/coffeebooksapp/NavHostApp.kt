@@ -81,7 +81,6 @@ fun NavHostApp(
         ) { backStackEntry ->
             BookDetail(
                 bookId = backStackEntry.arguments?.getInt("BookId") ?: 0,
-                onClickBack = { navController.navigateUp() },
                 onClickUpdate = {
                     // 図鑑アイテム編集画面に遷移
                     if (it.type == BooksItemType.SIMPLE_ITEM) {
@@ -158,7 +157,6 @@ fun NavHostApp(
             bookIdForDialog = backStackEntry.arguments?.getInt("BookItemId")!!
         }
 
-        // Setting画面
         composable(NavigationItem.CoffeeBookEdit.route) {
             CoffeeItemEdit(
                 onClickBack = {

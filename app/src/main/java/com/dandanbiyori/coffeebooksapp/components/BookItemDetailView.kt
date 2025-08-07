@@ -32,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,10 +73,7 @@ fun BookItemDetailView(
             isSystemCreated
         )
         BookItemDetailTopBar(
-            onClickBack,
-            onClickUpdate,
-            bookItem,
-            isSystemCreated
+            onClickBack
         )
     }
 
@@ -84,9 +82,6 @@ fun BookItemDetailView(
 @Composable
 fun BookItemDetailTopBar(
     onClickBack: () -> Unit,
-    onClickUpdate: (BookItem) -> Unit,
-    bookItem: BookItem,
-    isSystemCreated: Boolean
 ) {
     Row(
         modifier = Modifier
@@ -117,22 +112,6 @@ fun BookItemDetailTopBar(
                 tint = MaterialTheme.colorScheme.onSurface
             )
         }
-        if (!isSystemCreated) {
-            IconButton(
-                onClick = {
-                    onClickUpdate(bookItem)
-                },
-                modifier = Modifier
-                    .padding(end = Dimens.ToolbarIconPadding)
-                    .then(iconModifier)
-            ) {
-                Icon(
-                    Icons.Filled.Edit,
-                    contentDescription = "Icon",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
-        }
     }
 }
 
@@ -161,6 +140,12 @@ fun BookItemDetailContent(
         bookItem.flavor,
         bookItem.roast
     )
+
+    DisposableEffect(Unit) {
+        onDispose {
+            bookItemViewModel.resetProperties()
+        }
+    }
 
     // TODO 画像をタップで画像を最大表示できないか。
     Column(
